@@ -5,16 +5,9 @@
 public class WeaponData : ScriptableObject
 {
     public string weaponName;
-    public GameObject weaponPrefab;
+    public GameObject weaponPickupPrefab;
+    public GameObject weaponInHandPrefab;
     public int baseDamage = 10;
-    public Mesh weaponMesh;
-    public Material baseMaterial;
-
-
-    [Header("Audio")]
-    public AudioClip pickupSound;
-    public AudioClip attackSound;
-
 
 }
 

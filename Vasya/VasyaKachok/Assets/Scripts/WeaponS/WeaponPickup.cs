@@ -1,4 +1,4 @@
-// WeaponPickup.cs
+
 using UnityEngine;
 using static WeaponData;
 
@@ -12,15 +12,13 @@ public class WeaponPickup : MonoBehaviour
     [Header("References")]
     public Light pickupGlow;
 
+    public Transform posToSpawn;
 
-    void Start()
+    public void InitializePickup(WeaponData weaponData, WeaponRarity rarity)
     {
-        InitializePickup();
-    }
-
-    void InitializePickup()
-    {
-        spawnRarity = WeaponManager.GetRandomWeaponRarity();
+        this.weaponData = weaponData;
+        Instantiate(weaponData.weaponPickupPrefab, posToSpawn);
+        spawnRarity = rarity;
         pickupGlow.color = WeaponManager.GetRarityColor(spawnRarity);
     }
 
@@ -29,13 +27,6 @@ public class WeaponPickup : MonoBehaviour
         transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
     }
 
-    void OnTriggerStay(Collider other)
-    {
-        if (other.CompareTag("Player") && Input.GetKeyDown(KeyCode.E))
-        {
-            PickUpWeapon(other.GetComponent<Inventory>());
-        }
-    }
 
     void PickUpWeapon(Inventory inventory)
     {
@@ -45,6 +36,26 @@ public class WeaponPickup : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent<PickupManager>(out PickupManager pickupManager))
+        {
+            pickupManager.OnPlayerInPickupRange(GetComponent<WeaponPickup>());
+        }
+    }
+
+    
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.TryGetComponent<PickupManager>(out PickupManager pickupManager))
+        {
+            pickupManager.OnPlayerLeaveFromPickupRange(GetComponent<WeaponPickup>());
+        }
+
+    }
+
 
 
 }

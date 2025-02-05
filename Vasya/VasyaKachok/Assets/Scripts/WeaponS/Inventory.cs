@@ -18,16 +18,14 @@ public class Inventory : MonoBehaviour
         public WeaponRarity rarity;
     }
 
-    public List<WeaponInstance> weapons = new List<WeaponInstance>();
+    public GameObject currentWeapon;
     public Transform weaponParent;
+    
+    public WeaponPickupsSpawner pickupSpawner;
+
 
     public void AddWeapon(WeaponData newData, WeaponRarity newRarity)
     {
-        // Проверяем нет ли уже такого оружия такой же редкости
-        if (!weapons.Exists(w => w.data == newData && w.rarity == newRarity))
-        {
-            weapons.Add(new WeaponInstance { data = newData, rarity = newRarity });
-        }
         EquipWeapon(newData, newRarity);
     }
 
@@ -36,13 +34,16 @@ public class Inventory : MonoBehaviour
         // Удаляем текущее оружие
         foreach (Transform child in weaponParent)
         {
+            if (child.TryGetComponent<EquipedWeapon>(out EquipedWeapon eqWeapon))
+            {
+                pickupSpawner.SpawnPickupWeapon(eqWeapon.weaponData, eqWeapon.rarity, transform.position + Vector3.forward);
+            }
             Destroy(child.gameObject);
         }
 
         // Создаем новый экземпляр
-        GameObject newWeapon = Instantiate(data.weaponPrefab, weaponParent);
+        GameObject newWeapon = Instantiate(data.weaponInHandPrefab, weaponParent);
         EquipedWeapon weaponComponent = newWeapon.GetComponent<EquipedWeapon>();
         weaponComponent.Initialize(data, rarity);
     }
-
 }
