@@ -15,4 +15,8 @@ MonoBehaviour:
   enemyName: Icegergert
   health: 1000
   baseDamage: 20
-  enemyPrefab: {fileID: 0}
+  enemyPrefab: {fileID: 2699679072600159106, guid: 23820bf8915440f46b0b83cd7fadec51, type: 3}
+  attackRange: 1
+  chaseRange: 10
+  attackCooldown: 2
+  moveSpeed: 2
