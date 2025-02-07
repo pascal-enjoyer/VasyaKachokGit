@@ -1,6 +1,5 @@
 
 using UnityEngine;
-using static WeaponData;
 
 public class WeaponPickup : MonoBehaviour
 {

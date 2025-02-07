@@ -1,7 +1,5 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
-using UnityEngine.UI;
+
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovementController : MonoBehaviour
@@ -9,6 +7,7 @@ public class PlayerMovementController : MonoBehaviour
     [Header("References")]
     [SerializeField] private AnchoredJoystick joystick;
     [SerializeField] private PlayerAnimationManager animationManager;
+    [SerializeField] private CameraController thirdPersonCamera;
 
     [Header("Settings")]
     [SerializeField] private float walkSpeed = 5f;
@@ -32,21 +31,26 @@ public class PlayerMovementController : MonoBehaviour
 
     private void HandleMovement()
     {
-        // Получение ввода
+        // Получаем ввод от джойстика
         float horizontal = joystick.Horizontal;
         float vertical = joystick.Vertical;
         Vector3 direction = new Vector3(horizontal, 0, vertical).normalized;
 
-        // Расчет скорости
-        currentSpeed = isRunning ? runSpeed : walkSpeed;
-
-        // Движение и поворот
         if (direction.magnitude >= 0.1f)
         {
-            Vector3 moveVector = direction * currentSpeed;
-            characterController.SimpleMove(moveVector);
+            // Получаем направление камеры
+            Quaternion cameraRotation = thirdPersonCamera.GetCameraRotation();
+            // Преобразуем ввод в направление относительно камеры
+            Vector3 moveDirection = cameraRotation * direction;
+            moveDirection.y = 0;
 
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            // Устанавливаем скорость
+            currentSpeed = isRunning ? runSpeed : walkSpeed;
+            // Двигаем персонажа
+            characterController.SimpleMove(moveDirection * currentSpeed);
+
+            // Поворот персонажа в сторону движения
+            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
             transform.rotation = Quaternion.Lerp(
                 transform.rotation,
                 targetRotation,
@@ -54,7 +58,10 @@ public class PlayerMovementController : MonoBehaviour
             );
         }
         else
+        {
+            // Если ввода нет, останавливаем персонажа
             characterController.SimpleMove(Vector3.zero);
+        }
     }
 
     private void UpdateAnimations()

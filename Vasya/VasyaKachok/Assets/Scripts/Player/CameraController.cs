@@ -1,57 +1,66 @@
+
 using UnityEngine;
+
 
 public class CameraController : MonoBehaviour
 {
+    [Header("References")]
+    [SerializeField] private Transform target; // Цель (игрок)
+    [SerializeField] private Transform cameraTransform; // Трансформ камеры
+
     [Header("Settings")]
-    [SerializeField] private Transform target;
-    [SerializeField] private float followSharpness = 0.1f;
-    [SerializeField] private float verticalOffset = 10f;
-    [SerializeField] private float horizontalDistance = 5f;
+    [SerializeField] private float distance = 5f; // Дистанция от камеры до игрока
+    [SerializeField] private float minDistance = 2f; // Минимальная дистанция
+    [SerializeField] private float maxDistance = 10f; // Максимальная дистанция
+    [SerializeField] private float rotationSpeed = 5f; // Скорость вращения камеры
+    [SerializeField] private float followSpeed = 10f; // Скорость следования камеры
+    [SerializeField] private float heightOffset = 2f; // Высота камеры относительно игрока
 
-    private Vector3 currentVelocity;
-    private Vector3 baseOffset;
-    private Vector3 targetOffset;
-    private Camera mainCamera;
-
-    private void Awake()
-    {
-        mainCamera = Camera.main;
-        if (target == null)
-            target = GameObject.FindGameObjectWithTag("Player").transform;
-
-        // Рассчитываем начальное смещение на основе текущей позиции камеры
-        baseOffset = mainCamera.transform.position - target.position;
-        targetOffset = baseOffset;
-    }
+    private float currentX = 0f; // Текущий угол вращения по горизонтали
+    private float currentY = 30f; // Текущий угол вращения по вертикали
 
     private void LateUpdate()
     {
         if (target == null) return;
-
-        // Плавное изменение смещения при движении
-        targetOffset = Vector3.SmoothDamp(
-            targetOffset,
-            baseOffset.normalized * horizontalDistance + Vector3.up * verticalOffset,
-            ref currentVelocity,
-            followSharpness
-        );
-
-        // Рассчет целевой позиции с динамическим смещением
-        Vector3 targetPosition = target.position + targetOffset;
-
-        // Плавное перемещение камеры
-        mainCamera.transform.position = Vector3.Lerp(
-            mainCamera.transform.position,
-            targetPosition,
-            followSharpness * Time.deltaTime * 20f
-        );
+        
+        // Вращение камеры вокруг игрока
+        HandleCameraRotation();
+        // Обновление позиции камеры
+        UpdateCameraPosition();
     }
 
-    public void SetCameraParams(Transform newTarget, float newSharpness, float newVerticalOffset, float newHorizontalDistance)
+    private void HandleCameraRotation()
     {
-        target = newTarget;
-        followSharpness = newSharpness;
-        verticalOffset = newVerticalOffset;
-        horizontalDistance = newHorizontalDistance;
+        // Автоматическое вращение камеры, если игрок движется
+        if (target.GetComponent<CharacterController>().velocity.magnitude > 0.1f)
+        {
+            // Вычисляем направление движения игрока
+            Vector3 movementDirection = target.GetComponent<CharacterController>().velocity.normalized;
+            // Вычисляем целевой угол вращения камеры
+            float targetAngle = Mathf.Atan2(movementDirection.x, movementDirection.z) * Mathf.Rad2Deg;
+            // Плавно интерполируем текущий угол к целевому
+            currentX = Mathf.LerpAngle(currentX, targetAngle, rotationSpeed * Time.deltaTime);
+        }
+
+        
+    }
+
+    private void UpdateCameraPosition()
+    {
+        // Вычисляем позицию камеры на основе углов и дистанции
+        Quaternion rotation = Quaternion.Euler(currentY, currentX, 0);
+        Vector3 offset = new Vector3(0, heightOffset, -distance);
+        Vector3 desiredPosition = target.position + rotation * offset;
+
+        // Плавное перемещение камеры
+        cameraTransform.position = Vector3.Lerp(cameraTransform.position, desiredPosition, followSpeed * Time.deltaTime);
+        // Камера всегда смотрит на игрока
+        cameraTransform.LookAt(target.position + Vector3.up * heightOffset);
+    }
+
+    // Метод для получения текущего угла вращения камеры (для управления игроком)
+    public Quaternion GetCameraRotation()
+    {
+        return Quaternion.Euler(0, currentX, 0);
     }
 }

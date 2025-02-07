@@ -1,7 +1,4 @@
-using UnityEditor;
-using UnityEditor.AdaptivePerformance.Editor;
-using UnityEditor.Animations;
-using UnityEditorInternal;
+
 using UnityEngine;
 
 public class ActivePlayer : MonoBehaviour, IDamageable

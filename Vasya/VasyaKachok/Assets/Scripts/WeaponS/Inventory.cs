@@ -1,7 +1,5 @@
 // Inventory.cs
-using System.Collections.Generic;
-using Unity.Android.Gradle.Manifest;
-using UnityEditor;
+
 using UnityEngine;
 
 

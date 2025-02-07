@@ -1,0 +1,12 @@
+# ninja log v5
+47	564	7606035829991995	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	7aa4c9365e828603
+565	878	7606035832859848	D:/github/VasyaKachokGit/Vasya/VasyaKachok/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/712l1z6y/obj/arm64-v8a/libswappywrapper.so	39ee412f19d99f27
+14	1268	7606035837078852	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	236c60b903926743
+32	1281	7606035837169227	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	544e6686ede921f0
+26	1289	7606035837264545	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	a0385f535cbf91e2
+43	1354	7606035837968087	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	66c94af291892e9a
+38	1377	7606035838204253	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	c2329b22a9f93269
+1	1454	7606035838980300	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	f260bedcd7e5945e
+20	1615	7606035840585907	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	e176939c25e9815d
+10	1718	7606035841618172	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	44fd96262f5ba283
+1719	1796	7606035842461974	D:/github/VasyaKachokGit/Vasya/VasyaKachok/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/712l1z6y/obj/arm64-v8a/libgame.so	d868307c449e0d6a
