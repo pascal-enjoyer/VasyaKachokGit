@@ -1,64 +1,112 @@
-
 using UnityEngine;
-
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class CameraController : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Transform target; // Цель (игрок)
-    [SerializeField] private Transform cameraTransform; // Трансформ камеры
+    [SerializeField] private Transform target;
+    [SerializeField] private Transform cameraTransform;
+    [SerializeField] private RectTransform touchAreaPanel; // UI панель для зоны касания
 
     [Header("Settings")]
-    [SerializeField] private float distance = 5f; // Дистанция от камеры до игрока
-    [SerializeField] private float minDistance = 2f; // Минимальная дистанция
-    [SerializeField] private float maxDistance = 10f; // Максимальная дистанция
-    [SerializeField] private float rotationSpeed = 5f; // Скорость вращения камеры
-    [SerializeField] private float followSpeed = 10f; // Скорость следования камеры
-    [SerializeField] private float heightOffset = 2f; // Высота камеры относительно игрока
+    [SerializeField] private float distance = 5f;
+    [SerializeField] private float minDistance = 2f;
+    [SerializeField] private float maxDistance = 10f;
+    [SerializeField] private float rotationSpeed = 5f;
+    [SerializeField] private float followSpeed = 10f;
+    [SerializeField] private float heightOffset = 2f;
+    [SerializeField] private float touchRotationSpeed = 0.1f;
 
-    private float currentX = 0f; // Текущий угол вращения по горизонтали
-    private float currentY = 30f; // Текущий угол вращения по вертикали
+    [Header("Angle Restrictions")]
+    [SerializeField] private float minVerticalAngle = 10f; // Минимальный угол наклона
+    [SerializeField] private float maxVerticalAngle = 80f; // Максимальный угол наклона
+
+    private float currentX = 0f;
+    private float currentY = 30f;
+
+    private bool rotating = false;
 
     private void LateUpdate()
     {
         if (target == null) return;
-        
-        // Вращение камеры вокруг игрока
+
+        HandleTouchRotation();
         HandleCameraRotation();
-        // Обновление позиции камеры
         UpdateCameraPosition();
+    }
+
+    private void HandleTouchRotation()
+    {
+        if (Input.touchCount > 0 && touchAreaPanel != null)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            // Проверяем, находится ли касание в пределах UI панели
+            if (rotating)
+            {
+                if (touch.phase == TouchPhase.Moved)
+                {
+                    Vector2 deltaPosition = touch.deltaPosition;
+                    currentX += deltaPosition.x * touchRotationSpeed;
+                    currentY -= deltaPosition.y * touchRotationSpeed;
+
+                    // Ограничение вертикального угла
+                    currentY = Mathf.Clamp(currentY, minVerticalAngle, maxVerticalAngle);
+                }
+            }
+        }
+    }
+
+    public void ToggleUserRotation(bool isInPanel)
+    {
+        rotating = isInPanel;
+    }
+
+    private bool IsTouchInPanel(Vector2 touchPosition)
+    {
+        // Конвертируем позицию касания в локальные координаты панели
+        Vector2 localPoint;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            touchAreaPanel,
+            touchPosition,
+            null,
+            out localPoint);
+
+        // Проверяем находится ли точка внутри прямоугольника панели
+        return touchAreaPanel.rect.Contains(localPoint);
     }
 
     private void HandleCameraRotation()
     {
-        // Автоматическое вращение камеры, если игрок движется
-        if (target.GetComponent<CharacterController>().velocity.magnitude > 0.1f)
-        {
-            // Вычисляем направление движения игрока
-            Vector3 movementDirection = target.GetComponent<CharacterController>().velocity.normalized;
-            // Вычисляем целевой угол вращения камеры
-            float targetAngle = Mathf.Atan2(movementDirection.x, movementDirection.z) * Mathf.Rad2Deg;
-            // Плавно интерполируем текущий угол к целевому
-            currentX = Mathf.LerpAngle(currentX, targetAngle, rotationSpeed * Time.deltaTime);
-        }
+        CharacterController controller = target.GetComponent<CharacterController>();
+        if (controller == null) return;
 
-        
+        if (controller.velocity.magnitude > 0.1f)
+        {
+            Vector3 movementDirection = controller.velocity.normalized;
+            float targetAngle = Mathf.Atan2(movementDirection.x, movementDirection.z) * Mathf.Rad2Deg;
+            currentX = Mathf.LerpAngle(
+                currentX,
+                targetAngle,
+                rotationSpeed * Time.deltaTime * Mathf.Clamp01(1 - controller.velocity.magnitude * 0.1f));
+        }
     }
 
     private void UpdateCameraPosition()
     {
-        // Вычисляем позицию камеры на основе углов и дистанции
         Quaternion rotation = Quaternion.Euler(currentY, currentX, 0);
         Vector3 offset = new Vector3(0, heightOffset, -distance);
         Vector3 desiredPosition = target.position + rotation * offset;
 
-        // Плавное перемещение камеры
-        cameraTransform.position = Vector3.Lerp(cameraTransform.position, desiredPosition, followSpeed * Time.deltaTime);
-        // Камера всегда смотрит на игрока
+        cameraTransform.position = Vector3.Lerp(
+            cameraTransform.position,
+            desiredPosition,
+            followSpeed * Time.deltaTime);
+
         cameraTransform.LookAt(target.position + Vector3.up * heightOffset);
     }
 
-    // Метод для получения текущего угла вращения камеры (для управления игроком)
     public Quaternion GetCameraRotation()
     {
         return Quaternion.Euler(0, currentX, 0);
