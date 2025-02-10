@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 288481961944861161}
   - component: {fileID: 3355985134562740113}
   - component: {fileID: 8845027913513553721}
+  - component: {fileID: 8705723150267190404}
   m_Layer: 0
-  m_Name: Enemy
+  m_Name: PoliceEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -87,6 +88,29 @@ MonoBehaviour:
   chaseRange: 10
   attackCooldown: 2
   FoundPlayer: 0
+--- !u!136 &8705723150267190404
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3051719832380469}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.25
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &8470221125390634259
 PrefabInstance:
   m_ObjectHideFlags: 0

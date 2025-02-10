@@ -1,5 +1,5 @@
+// PlayerMovementController.cs
 using UnityEngine;
-
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovementController : MonoBehaviour
@@ -8,6 +8,7 @@ public class PlayerMovementController : MonoBehaviour
     [SerializeField] private AnchoredJoystick joystick;
     [SerializeField] private PlayerAnimationManager animationManager;
     [SerializeField] private CameraController thirdPersonCamera;
+    [SerializeField] private StaminaManager staminaManager;
 
     [Header("Settings")]
     [SerializeField] private float walkSpeed = 5f;
@@ -17,39 +18,36 @@ public class PlayerMovementController : MonoBehaviour
     private CharacterController characterController;
     private bool isRunning;
     private float currentSpeed;
+    private bool canRun = true;
 
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
+        staminaManager.OnStaminaDepleted.AddListener(HandleStaminaDepleted);
+        staminaManager.OnStaminaRestored.AddListener(HandleStaminaRestored);
     }
-
     private void Update()
     {
         HandleMovement();
         UpdateAnimations();
+        UpdateRunningState();
     }
 
     private void HandleMovement()
     {
-        // Получаем ввод от джойстика
         float horizontal = joystick.Horizontal;
         float vertical = joystick.Vertical;
         Vector3 direction = new Vector3(horizontal, 0, vertical).normalized;
 
         if (direction.magnitude >= 0.1f)
         {
-            // Получаем направление камеры
             Quaternion cameraRotation = thirdPersonCamera.GetCameraRotation();
-            // Преобразуем ввод в направление относительно камеры
             Vector3 moveDirection = cameraRotation * direction;
             moveDirection.y = 0;
 
-            // Устанавливаем скорость
-            currentSpeed = isRunning ? runSpeed : walkSpeed;
-            // Двигаем персонажа
+            currentSpeed = isRunning && canRun ? runSpeed : walkSpeed;
             characterController.SimpleMove(moveDirection * currentSpeed);
 
-            // Поворот персонажа в сторону движения
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
             transform.rotation = Quaternion.Lerp(
                 transform.rotation,
@@ -59,8 +57,16 @@ public class PlayerMovementController : MonoBehaviour
         }
         else
         {
-            // Если ввода нет, останавливаем персонажа
             characterController.SimpleMove(Vector3.zero);
+        }
+    }
+
+    private void UpdateRunningState()
+    {
+        if (isRunning && !staminaManager.CanRun)
+        {
+            isRunning = false;
+            staminaManager.StopRunning();
         }
     }
 
@@ -68,7 +74,7 @@ public class PlayerMovementController : MonoBehaviour
     {
         if (characterController.velocity.magnitude > 0.1f)
         {
-            animationManager.ChangeAnimation(isRunning ? "Run" : "Walk");
+            animationManager.ChangeAnimation(isRunning && canRun ? "Run" : "Walk");
         }
         else
         {
@@ -76,7 +82,29 @@ public class PlayerMovementController : MonoBehaviour
         }
     }
 
-    public void OnRunButtonPressed() => isRunning = true;
-    public void OnRunButtonReleased() => isRunning = false;
+    private void HandleStaminaDepleted()
+    {
+        canRun = false;
+        isRunning = false;
+    }
 
+    private void HandleStaminaRestored()
+    {
+        canRun = true;
+    }
+
+    public void OnRunButtonPressed()
+    {
+        if (staminaManager.CanRun)
+        {
+            isRunning = true;
+            staminaManager.StartRunning();
+        }
+    }
+
+    public void OnRunButtonReleased()
+    {
+        isRunning = false;
+        staminaManager.StopRunning();
+    }
 }

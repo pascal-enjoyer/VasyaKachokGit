@@ -9,14 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a0dee61b7c5638949b74f3ddd71052fe, type: 3}
-  m_Name: PoliceMan
+  m_Script: {fileID: 11500000, guid: 6d2829bd79764134c800df959da5ec2c, type: 3}
+  m_Name: Player
   m_EditorClassIdentifier: 
-  enemyName: Icegergert
   health: 1000
-  baseDamage: 20
-  enemyPrefab: {fileID: 2699679072600159106, guid: 23820bf8915440f46b0b83cd7fadec51, type: 3}
-  attackRange: 1.25
-  chaseRange: 10
-  attackCooldown: 2
-  moveSpeed: 5
+  baseDamage: 50
+  playerName: sapsan15
+  maxStamina: 125
+  staminaRegenRate: 20
+  staminaDrainRate: 15
+  currentStamina: 0

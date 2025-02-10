@@ -1,6 +1,7 @@
 
 using UnityEngine.AI;
 using UnityEngine;
+using Unity.VisualScripting;
 
 public enum EnemyState
 {
@@ -18,6 +19,7 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private float attackRange = 1.5f;
     [SerializeField] private float chaseRange = 10f;
     [SerializeField] private float attackCooldown = 2f;
+    [SerializeField] private float extraRotationSpeed = 100f;
 
     private Transform target;
     private NavMeshAgent agent;
@@ -25,6 +27,7 @@ public class EnemyController : MonoBehaviour
     private EnemyState currentState = EnemyState.Idle;
     private float currentHealth;
     private float lastAttackTime;
+
 
     public bool FoundPlayer = false;
 
@@ -52,9 +55,13 @@ public class EnemyController : MonoBehaviour
         {
             float distanceToTarget = Vector3.Distance(transform.position, target.position);
 
+            Vector3 lookrotation = target.position - transform.position;
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookrotation), extraRotationSpeed * Time.deltaTime);
+
             if (distanceToTarget <= attackRange && currentState != EnemyState.Attack)
             {
                 StartAttack();
+
             }
             else if (distanceToTarget > attackRange && currentState != EnemyState.Chase)
             {
@@ -64,6 +71,8 @@ public class EnemyController : MonoBehaviour
             if (currentState == EnemyState.Chase)
             {
                 agent.SetDestination(target.position);
+                    animatorController.ChangeAnimation("Standard Run");
+
             }
         }
         else
@@ -105,14 +114,17 @@ public class EnemyController : MonoBehaviour
     {
         currentState = EnemyState.Chase;
         agent.isStopped = false;
-        animatorController.SetMovementSpeed(agent.velocity.magnitude);
+
+
     }
 
     private void StartAttack()
     {
+
+        animatorController.ChangeAnimation("Cross Punch");
         currentState = EnemyState.Attack;
         agent.isStopped = true;
-        animatorController.ChangeAnimation("Cross Punch");
+        agent.velocity = Vector3.zero;
         lastAttackTime = Time.time;
     }
 

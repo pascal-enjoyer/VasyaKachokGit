@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class PickupManager : MonoBehaviour
@@ -7,15 +8,12 @@ public class PickupManager : MonoBehaviour
 
     private List<WeaponPickup> availableToPickupWeapons = new List<WeaponPickup>();
 
-    private WeaponPickup closestToPickupWeapon;
+    public WeaponPickup closestToPickupWeapon;
 
-    public Button PickupButton;
+    public UnityEvent<bool> WeaponInPickupZone;
 
-    private void Start()
-    {
-        PickupButton.onClick.AddListener(OnPickupButtonClicked);
-        PickupButton.gameObject.SetActive(closestToPickupWeapon != null);
-    }
+
+
 
     private void Update()
     {
@@ -61,24 +59,25 @@ public class PickupManager : MonoBehaviour
     {
         if (gameObject.TryGetComponent<Inventory>(out Inventory inventory) && closestToPickupWeapon != null)
         {
-            inventory.AddWeapon(closestToPickupWeapon.weaponData, closestToPickupWeapon.spawnRarity);
+            closestToPickupWeapon.PickUpWeapon(inventory);
             OnPlayerLeaveFromPickupRange(closestToPickupWeapon);
-            Destroy(closestToPickupWeapon.gameObject);
-            closestToPickupWeapon = null;
         }
     }
 
     public void OnPlayerInPickupRange(WeaponPickup weaponPickup)
     {
+        WeaponInPickupZone?.Invoke(true);
         availableToPickupWeapons.Add(weaponPickup); 
-        PickupButton.gameObject.SetActive(true);
     }
 
     public void OnPlayerLeaveFromPickupRange(WeaponPickup weaponPickup)
     {
+        
         availableToPickupWeapons.Remove(weaponPickup);
         if (availableToPickupWeapons.Count == 0)
-            PickupButton.gameObject.SetActive(false);
+        {
+            WeaponInPickupZone?.Invoke(false);
+        }
     }
  
 }

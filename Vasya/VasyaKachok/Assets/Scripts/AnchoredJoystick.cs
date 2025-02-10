@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Events;
 
 public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
@@ -8,14 +9,21 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
     [SerializeField] private RectTransform handle;
     [SerializeField] private Canvas canvas;
 
-    [Header("Settings")]
-    [SerializeField] private float handleRange = 1f;
-    [SerializeField] private float deadZone = 0f;
-    [SerializeField] private AxisOptions axisOptions = AxisOptions.Both;
+    [Header("Radius Settings")]
+    [SerializeField] private float walkRadius = 50f;
+    [SerializeField] private float runRadius = 75f;
+    [SerializeField] private float magnetForce = 15f;
+
+    [Header("Events")]
+    public UnityEvent RunPressed;
+    public UnityEvent RunReleased;
 
     private Vector2 input = Vector2.zero;
     private Vector2 joystickCenter = Vector2.zero;
     private int currentPointerId = -1;
+    private bool isRunning = false;
+    private bool runEnabled = true;
+    private Camera eventCamera;
 
     public float Horizontal => input.x;
     public float Vertical => input.y;
@@ -26,8 +34,15 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
         if (canvas == null)
             canvas = GetComponentInParent<Canvas>();
 
+        eventCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ?
+            null : canvas.worldCamera;
     }
 
+    public void SetRunningEnabled(bool enabled)
+    {
+        runEnabled = enabled;
+        ApplyMagneticEffect(handle.anchoredPosition, true);
+    }
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -37,9 +52,8 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 background,
                 eventData.position,
-                canvas.renderMode == RenderMode.ScreenSpaceCamera ? canvas.worldCamera : null,
+                eventCamera,
                 out joystickCenter);
-
         }
     }
 
@@ -48,25 +62,72 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
         if (eventData.pointerId != currentPointerId) return;
 
         Vector2 touchPosition;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
             background,
             eventData.position,
-            canvas.renderMode == RenderMode.ScreenSpaceCamera ? canvas.worldCamera : null,
-            out touchPosition);
+            eventCamera,
+            out touchPosition)) return;
 
-        Vector2 direction = touchPosition - joystickCenter;
-        float radius = background.rect.width * 0.5f;
+        Vector2 rawDirection = touchPosition - joystickCenter;
+        Vector2 processedDirection = ApplyMagneticEffect(rawDirection);
 
-        input = (direction.magnitude > radius)
-            ? direction.normalized
-            : direction / radius;
+        UpdateHandlePosition(processedDirection);
+        UpdateRunState(processedDirection.magnitude);
+    }
+    private Vector2 ApplyMagneticEffect(Vector2 rawDirection, bool forceUpdate = false)
+    {
+        float currentMaxRadius = runEnabled ? runRadius : walkRadius;
+        float rawDistance = rawDirection.magnitude;
 
-        if (axisOptions == AxisOptions.Horizontal)
-            input = new Vector2(input.x, 0f);
-        else if (axisOptions == AxisOptions.Vertical)
-            input = new Vector2(0f, input.y);
+        if (rawDistance <= 0.01f) return Vector2.zero;
 
-        handle.anchoredPosition = input * radius * handleRange;
+        // Увеличиваем зону влияния магнита до 30% от радиуса
+        float threshold = currentMaxRadius * 0.3f;
+        float magnetZoneStart = currentMaxRadius - threshold;
+
+        // Всегда применяем магнит к ближайшему радиусу
+        float targetRadius = currentMaxRadius;
+        if (!runEnabled)
+        {
+            // Если бег отключен, магнит только к радиусу ходьбы
+            targetRadius = walkRadius;
+            magnetZoneStart = walkRadius - threshold;
+        }
+
+        if (rawDistance > magnetZoneStart || forceUpdate)
+        {
+            // Усиливаем эффект магнита
+            float lerpFactor = Mathf.Clamp01((rawDistance - magnetZoneStart) / threshold);
+            lerpFactor = Mathf.Pow(lerpFactor, 0.5f); // Увеличиваем силу притяжения
+
+            float targetDistance = Mathf.Lerp(magnetZoneStart, targetRadius, lerpFactor);
+            return rawDirection.normalized * targetDistance;
+        }
+        return rawDirection;
+    }
+    private void UpdateHandlePosition(Vector2 direction)
+    {
+        float currentMaxRadius = runEnabled ? runRadius : walkRadius;
+        float clampedDistance = Mathf.Clamp(direction.magnitude, 0, currentMaxRadius);
+
+        // Явное притягивание к границе при близком расстоянии
+        if (Mathf.Abs(clampedDistance - currentMaxRadius) < 2f)
+        {
+            clampedDistance = currentMaxRadius;
+        }
+
+        Vector2 finalDirection = direction.normalized * clampedDistance;
+        handle.anchoredPosition = finalDirection;
+        input = finalDirection / currentMaxRadius;
+    }
+
+    private void UpdateRunState(float currentDistance)
+    {
+        bool wasRunning = isRunning;
+        isRunning = runEnabled && currentDistance > walkRadius;
+
+        if (!wasRunning && isRunning) RunPressed?.Invoke();
+        else if (wasRunning && !isRunning) RunReleased?.Invoke();
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -76,16 +137,11 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
             input = Vector2.zero;
             handle.anchoredPosition = Vector2.zero;
             currentPointerId = -1;
+            if (isRunning)
+            {
+                isRunning = false;
+                RunReleased?.Invoke();
+            }
         }
     }
-
-    private void UpdateInput(Vector2 direction)
-    {
-        if (direction.magnitude > deadZone)
-            input = direction.normalized * ((direction.magnitude - deadZone) / (1 - deadZone));
-        else
-            input = Vector2.zero;
-    }
-
-    public enum AxisOptions { Both, Horizontal, Vertical }
 }

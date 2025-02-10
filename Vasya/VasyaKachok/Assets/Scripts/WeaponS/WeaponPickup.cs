@@ -13,6 +13,13 @@ public class WeaponPickup : MonoBehaviour
 
     public Transform posToSpawn;
 
+    public void Start()
+    {
+        if (weaponData!=null)
+            InitializePickup(weaponData, spawnRarity);
+
+    }
+
     public void InitializePickup(WeaponData weaponData, WeaponRarity rarity)
     {
         this.weaponData = weaponData;
@@ -27,7 +34,7 @@ public class WeaponPickup : MonoBehaviour
     }
 
 
-    void PickUpWeapon(Inventory inventory)
+    public void PickUpWeapon(Inventory inventory)
     {
         if (inventory != null)
         {
