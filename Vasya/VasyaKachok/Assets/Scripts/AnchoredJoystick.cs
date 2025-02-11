@@ -9,20 +9,21 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
     [SerializeField] private RectTransform handle;
     [SerializeField] private Canvas canvas;
 
-    [Header("Radius Settings")]
-    [SerializeField] private float walkRadius = 50f;
-    [SerializeField] private float runRadius = 75f;
-    [SerializeField] private float magnetForce = 15f;
+    [Header("Settings")]
+    [SerializeField] private float runRadius = 100f;
+    [SerializeField][Range(0.1f, 0.5f)] private float magnetZone = 0.15f;
+    [SerializeField] private float magnetResponse = 10f;
 
     [Header("Events")]
     public UnityEvent RunPressed;
     public UnityEvent RunReleased;
 
+    private float walkRadius => runRadius * 0.85f;
     private Vector2 input = Vector2.zero;
-    private Vector2 joystickCenter = Vector2.zero;
+    private Vector2 joystickCenter;
     private int currentPointerId = -1;
-    private bool isRunning = false;
-    private bool runEnabled = true;
+    private bool isRunning;
+    private bool runAllowed = true;
     private Camera eventCamera;
 
     public float Horizontal => input.x;
@@ -38,10 +39,22 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
             null : canvas.worldCamera;
     }
 
-    public void SetRunningEnabled(bool enabled)
+    public void SetRunEnabled(bool enabled)
     {
-        runEnabled = enabled;
-        ApplyMagneticEffect(handle.anchoredPosition, true);
+        runAllowed = enabled;
+        if (!runAllowed && isRunning)
+        {
+            SnapToWalkRadius();
+            RunReleased?.Invoke();
+            isRunning = false;
+        }
+    }
+
+    private void SnapToWalkRadius()
+    {
+        Vector2 currentDirection = handle.anchoredPosition.normalized;
+        handle.anchoredPosition = currentDirection * walkRadius;
+        input = handle.anchoredPosition / runRadius;
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -61,87 +74,105 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
         if (eventData.pointerId != currentPointerId) return;
 
-        Vector2 touchPosition;
+        Vector2 touchPos;
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
             background,
             eventData.position,
             eventCamera,
-            out touchPosition)) return;
+            out touchPos)) return;
 
-        Vector2 rawDirection = touchPosition - joystickCenter;
-        Vector2 processedDirection = ApplyMagneticEffect(rawDirection);
-
-        UpdateHandlePosition(processedDirection);
-        UpdateRunState(processedDirection.magnitude);
+        Vector2 rawDirection = touchPos - joystickCenter;
+        ProcessInput(rawDirection);
     }
-    private Vector2 ApplyMagneticEffect(Vector2 rawDirection, bool forceUpdate = false)
+
+    private void ProcessInput(Vector2 rawDirection)
     {
-        float currentMaxRadius = runEnabled ? runRadius : walkRadius;
-        float rawDistance = rawDirection.magnitude;
+        float currentDistance = rawDirection.magnitude;
+        float targetRadius = CalculateTargetRadius(currentDistance);
+        Vector2 newPosition;
 
-        if (rawDistance <= 0.01f) return Vector2.zero;
-
-        // Увеличиваем зону влияния магнита до 30% от радиуса
-        float threshold = currentMaxRadius * 0.3f;
-        float magnetZoneStart = currentMaxRadius - threshold;
-
-        // Всегда применяем магнит к ближайшему радиусу
-        float targetRadius = currentMaxRadius;
-        if (!runEnabled)
+        // Магнитный эффект
+        if (currentDistance > targetRadius - runRadius * magnetZone &&
+            currentDistance < targetRadius + runRadius * magnetZone)
         {
-            // Если бег отключен, магнит только к радиусу ходьбы
-            targetRadius = walkRadius;
-            magnetZoneStart = walkRadius - threshold;
+            newPosition = rawDirection.normalized * targetRadius;
+        }
+        else
+        {
+            newPosition = rawDirection.normalized * Mathf.Clamp(
+                currentDistance,
+                0,
+                runAllowed ? runRadius : walkRadius
+            );
         }
 
-        if (rawDistance > magnetZoneStart || forceUpdate)
-        {
-            // Усиливаем эффект магнита
-            float lerpFactor = Mathf.Clamp01((rawDistance - magnetZoneStart) / threshold);
-            lerpFactor = Mathf.Pow(lerpFactor, 0.5f); // Увеличиваем силу притяжения
+        // Плавное перемещение
+        handle.anchoredPosition = Vector2.Lerp(
+            handle.anchoredPosition,
+            newPosition,
+            Time.deltaTime * magnetResponse
+        );
 
-            float targetDistance = Mathf.Lerp(magnetZoneStart, targetRadius, lerpFactor);
-            return rawDirection.normalized * targetDistance;
-        }
-        return rawDirection;
+        UpdateInput(handle.anchoredPosition);
+        UpdateRunState(handle.anchoredPosition.magnitude);
     }
-    private void UpdateHandlePosition(Vector2 direction)
+
+    private float CalculateTargetRadius(float currentDistance)
     {
-        float currentMaxRadius = runEnabled ? runRadius : walkRadius;
-        float clampedDistance = Mathf.Clamp(direction.magnitude, 0, currentMaxRadius);
+        if (!runAllowed) return walkRadius;
 
-        // Явное притягивание к границе при близком расстоянии
-        if (Mathf.Abs(clampedDistance - currentMaxRadius) < 2f)
-        {
-            clampedDistance = currentMaxRadius;
-        }
+        // Определяем ближайший радиус
+        float walkDistance = Mathf.Abs(currentDistance - walkRadius);
+        float runDistance = Mathf.Abs(currentDistance - runRadius);
 
-        Vector2 finalDirection = direction.normalized * clampedDistance;
-        handle.anchoredPosition = finalDirection;
-        input = finalDirection / currentMaxRadius;
+        return walkDistance < runDistance ? walkRadius : runRadius;
+    }
+
+    private void UpdateInput(Vector2 position)
+    {
+        input = position / (isRunning ? runRadius : walkRadius);
     }
 
     private void UpdateRunState(float currentDistance)
     {
-        bool wasRunning = isRunning;
-        isRunning = runEnabled && currentDistance > walkRadius;
+        bool newState = runAllowed && currentDistance >= walkRadius;
 
-        if (!wasRunning && isRunning) RunPressed?.Invoke();
-        else if (wasRunning && !isRunning) RunReleased?.Invoke();
+        if (newState == isRunning) return;
+
+        isRunning = newState;
+        if (isRunning)
+        {
+            RunPressed?.Invoke();
+            input = handle.anchoredPosition / runRadius;
+        }
+        else
+        {
+            RunReleased?.Invoke();
+            input = handle.anchoredPosition / walkRadius;
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         if (eventData.pointerId == currentPointerId)
         {
-            input = Vector2.zero;
             handle.anchoredPosition = Vector2.zero;
+            input = Vector2.zero;
             currentPointerId = -1;
+
             if (isRunning)
             {
                 isRunning = false;
                 RunReleased?.Invoke();
             }
         }
+    }
+
+    public void SetRunningEnabled(bool enabled)
+    {
+        if (isRunning == enabled) return;
+
+        isRunning = enabled;
+        SnapToWalkRadius();
     }
 }

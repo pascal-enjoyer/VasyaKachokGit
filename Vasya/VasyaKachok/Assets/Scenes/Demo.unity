@@ -5771,9 +5771,9 @@ MonoBehaviour:
   background: {fileID: 8135886326285287099}
   handle: {fileID: 8135886327131586001}
   canvas: {fileID: 892007452}
-  walkRadius: 150
   runRadius: 200
-  magnetForce: 1000
+  magnetZone: 0.25
+  magnetResponse: 100
   RunPressed:
     m_PersistentCalls:
       m_Calls:
