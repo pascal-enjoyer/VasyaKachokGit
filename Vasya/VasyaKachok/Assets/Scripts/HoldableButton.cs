@@ -10,14 +10,15 @@ public class HoldableButton : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     [SerializeField] private float repeatInterval = 0.1f;
 
     [Header("Events")]
-    public UnityEngine.Events.UnityEvent OnPress;
-    public UnityEngine.Events.UnityEvent OnRelease;
-    public UnityEngine.Events.UnityEvent OnHold;
+    public UnityEngine.Events.UnityEvent<Vector2> OnPress; // Событие с передачей позиции нажатия
+    public UnityEngine.Events.UnityEvent<Vector2> OnRelease; // Событие с передачей позиции отпускания
+    public UnityEngine.Events.UnityEvent<Vector2> OnHold; // Событие с передачей позиции удержания
 
     private bool isPressed;
     private bool isHolding;
     private float holdTimer;
     private Button button;
+    private Vector2 lastPointerPosition; // Последняя позиция касания
 
     private void Awake()
     {
@@ -34,12 +35,14 @@ public class HoldableButton : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     {
         if (Input.GetKeyDown(keyboardKey) && !isPressed)
         {
-            StartPress();
+            // Для клавиатуры используем позицию центра кнопки
+            lastPointerPosition = GetButtonCenterPosition();
+            StartPress(lastPointerPosition);
         }
 
         if (Input.GetKeyUp(keyboardKey) && isPressed)
         {
-            EndPress();
+            EndPress(lastPointerPosition);
         }
     }
 
@@ -54,7 +57,7 @@ public class HoldableButton : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             // Повторяющееся действие при удержании
             if (repeatInterval > 0 && holdTimer >= repeatInterval)
             {
-                OnHold?.Invoke();
+                OnHold?.Invoke(lastPointerPosition);
                 holdTimer = 0;
             }
         }
@@ -63,41 +66,47 @@ public class HoldableButton : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             // Начало удержания после задержки
             isHolding = true;
             holdTimer = 0;
-            OnHold?.Invoke();
+            OnHold?.Invoke(lastPointerPosition);
         }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!button.interactable) return;
-        StartPress();
+
+        // Сохраняем позицию касания
+        lastPointerPosition = eventData.position;
+        StartPress(lastPointerPosition);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         if (!button.interactable) return;
-        EndPress();
+
+        // Сохраняем позицию отпускания
+        lastPointerPosition = eventData.position;
+        EndPress(lastPointerPosition);
     }
 
-    private void StartPress()
+    private void StartPress(Vector2 position)
     {
         if (!button.interactable) return;
 
         isPressed = true;
         holdTimer = 0;
         isHolding = false;
-        OnPress?.Invoke();
+        OnPress?.Invoke(position);
 
         // Анимация нажатия
         if (button.animator != null)
             button.animator.SetTrigger("Pressed");
     }
 
-    private void EndPress()
+    private void EndPress(Vector2 position)
     {
         isPressed = false;
         isHolding = false;
-        OnRelease?.Invoke();
+        OnRelease?.Invoke(position);
 
         // Анимация отпускания
         if (button.animator != null)
@@ -105,9 +114,17 @@ public class HoldableButton : MonoBehaviour, IPointerDownHandler, IPointerUpHand
     }
 
     // Для внешнего управления
-    public void SimulatePress(bool state)
+    public void SimulatePress(bool state, Vector2 position)
     {
-        if (state) StartPress();
-        else EndPress();
+        if (state) StartPress(position);
+        else EndPress(position);
+    }
+
+    // Получение центра кнопки в экранных координатах
+    private Vector2 GetButtonCenterPosition()
+    {
+        RectTransform rectTransform = button.GetComponent<RectTransform>();
+        Vector2 screenPosition = RectTransformUtility.WorldToScreenPoint(null, rectTransform.position);
+        return screenPosition;
     }
 }

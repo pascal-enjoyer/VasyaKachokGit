@@ -30,32 +30,20 @@ public class CameraController : MonoBehaviour
     private void LateUpdate()
     {
         if (target == null) return;
-
-        HandleTouchRotation();
+        
         HandleCameraRotation();
         UpdateCameraPosition();
     }
 
-    private void HandleTouchRotation()
+    public void HandleTouchRotation(Vector2 touchPos)
     {
-        if (Input.touchCount > 0 && touchAreaPanel != null)
-        {
-            Touch touch = Input.GetTouch(0);
+        Vector2 deltaPosition = touchPos;
+        currentX += deltaPosition.x * touchRotationSpeed;
+        currentY -= deltaPosition.y * touchRotationSpeed;
 
-            // ѕровер€ем, находитс€ ли касание в пределах UI панели
-            if (rotating)
-            {
-                if (touch.phase == TouchPhase.Moved)
-                {
-                    Vector2 deltaPosition = touch.deltaPosition;
-                    currentX += deltaPosition.x * touchRotationSpeed;
-                    currentY -= deltaPosition.y * touchRotationSpeed;
-
-                    // ќграничение вертикального угла
-                    currentY = Mathf.Clamp(currentY, minVerticalAngle, maxVerticalAngle);
-                }
-            }
-        }
+        // ќграничение вертикального угла
+        currentY = Mathf.Clamp(currentY, minVerticalAngle, maxVerticalAngle);
+     
     }
 
     public void ToggleUserRotation(bool isInPanel)
