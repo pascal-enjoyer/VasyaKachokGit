@@ -8,7 +8,6 @@ public class PlayerMovementController : MonoBehaviour
     [SerializeField] private AnchoredJoystick joystick;
     [SerializeField] private PlayerAnimationManager animationManager;
     [SerializeField] private CameraController thirdPersonCamera;
-    [SerializeField] private StaminaManager staminaManager;
 
     [Header("Settings")]
     [SerializeField] private float walkSpeed = 5f;
@@ -23,14 +22,11 @@ public class PlayerMovementController : MonoBehaviour
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
-        staminaManager.OnStaminaDepleted.AddListener(HandleStaminaDepleted);
-        staminaManager.OnStaminaRestored.AddListener(HandleStaminaRestored);
     }
     private void Update()
     {
         HandleMovement();
         UpdateAnimations();
-        UpdateRunningState();
     }
 
     private void HandleMovement()
@@ -61,15 +57,6 @@ public class PlayerMovementController : MonoBehaviour
         }
     }
 
-    private void UpdateRunningState()
-    {
-        if (isRunning && !staminaManager.CanRun)
-        {
-            isRunning = false;
-            staminaManager.StopRunning();
-        }
-    }
-
     private void UpdateAnimations()
     {
         if (characterController.velocity.magnitude > 0.1f)
@@ -82,29 +69,15 @@ public class PlayerMovementController : MonoBehaviour
         }
     }
 
-    private void HandleStaminaDepleted()
-    {
-        canRun = false;
-        isRunning = false;
-    }
 
-    private void HandleStaminaRestored()
-    {
-        canRun = true;
-    }
 
     public void OnRunButtonPressed()
-    {
-        if (staminaManager.CanRun)
-        {
-            isRunning = true;
-            staminaManager.StartRunning();
-        }
+{
+        isRunning = true;
     }
 
     public void OnRunButtonReleased()
     {
         isRunning = false;
-        staminaManager.StopRunning();
     }
 }

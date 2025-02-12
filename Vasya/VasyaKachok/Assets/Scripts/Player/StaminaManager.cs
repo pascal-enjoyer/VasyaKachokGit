@@ -23,7 +23,7 @@ public class StaminaManager : MonoBehaviour
 
     private void Awake()
     {
-        currentStamina = playerData.maxStamina;
+        currentStamina = playerData.playerStamina.maxStamina;
     }
 
     private void Update()
@@ -37,7 +37,7 @@ public class StaminaManager : MonoBehaviour
 
     private void CheckRunUnlock()
     {
-        if (staminaDepleted && currentStamina >= playerData.maxStamina * runUnlockThreshold)
+        if (staminaDepleted && currentStamina >= playerData.playerStamina.maxStamina * runUnlockThreshold)
         {
             staminaDepleted = false;
             OnStaminaRestored?.Invoke();
@@ -60,8 +60,8 @@ public class StaminaManager : MonoBehaviour
     {
         if (isRunning && CanRun)
         {
-            currentStamina -= playerData.staminaDrainRate * Time.fixedDeltaTime;
-            currentStamina = Mathf.Clamp(currentStamina, 0, playerData.maxStamina);
+            currentStamina -= playerData.playerStamina.staminaDrainRate * Time.fixedDeltaTime;
+            currentStamina = Mathf.Clamp(currentStamina, 0, playerData.playerStamina.maxStamina);
 
             UpdateStaminaUI();
 
@@ -75,22 +75,22 @@ public class StaminaManager : MonoBehaviour
 
     private void RegenerateStamina()
     {
-        if (currentStamina >= playerData.maxStamina) return;
+        if (currentStamina >= playerData.playerStamina.maxStamina) return;
 
-        currentStamina += playerData.staminaRegenRate * Time.deltaTime;
-        currentStamina = Mathf.Clamp(currentStamina, 0, playerData.maxStamina);
+        currentStamina += playerData.playerStamina.staminaRegenRate * Time.deltaTime;
+        currentStamina = Mathf.Clamp(currentStamina, 0, playerData.playerStamina.maxStamina);
         UpdateStaminaUI();
     }
 
     private void UpdateStaminaUI()
     {
-        float staminaPercent = currentStamina / playerData.maxStamina;
+        float staminaPercent = currentStamina / playerData.playerStamina.maxStamina;
         OnStaminaChanged?.Invoke(staminaPercent);
     }
 
     public void ResetStamina()
     {
-        currentStamina = playerData.maxStamina;
+        currentStamina = playerData.playerStamina.maxStamina;
         staminaDepleted = false;
         UpdateStaminaUI();
     }

@@ -7,9 +7,7 @@ public class PlayerData : ScriptableObject
     public int baseDamage;
     public string playerName;
 
-    [Header("Стамина")]
-    public float maxStamina = 100f;
-    public float staminaRegenRate = 15f;
-    public float staminaDrainRate = 25f;
-    [HideInInspector] public float currentStamina;
+    public PlayerStaminaData playerStamina;
+
+
 }
