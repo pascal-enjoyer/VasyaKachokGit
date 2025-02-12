@@ -168,11 +168,4 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
         }
     }
 
-    public void SetRunningEnabled(bool enabled)
-    {
-        if (isRunning == enabled) return;
-
-        isRunning = enabled;
-        SnapToWalkRadius();
-    }
 }

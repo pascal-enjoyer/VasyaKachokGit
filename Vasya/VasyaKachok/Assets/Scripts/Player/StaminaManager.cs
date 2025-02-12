@@ -5,7 +5,6 @@ public class StaminaManager : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private PlayerData playerData;
-    [SerializeField] private AnchoredJoystick joystick;
 
     [Header("Settings")]
     [SerializeField] private float regenDelay = 2f;
@@ -41,7 +40,6 @@ public class StaminaManager : MonoBehaviour
         if (staminaDepleted && currentStamina >= playerData.maxStamina * runUnlockThreshold)
         {
             staminaDepleted = false;
-            joystick.SetRunningEnabled(true);
             OnStaminaRestored?.Invoke();
         }
     }
@@ -70,7 +68,6 @@ public class StaminaManager : MonoBehaviour
             if (currentStamina <= 0)
             {
                 staminaDepleted = true;
-                joystick.SetRunningEnabled(false);
                 OnStaminaDepleted?.Invoke();
             }
         }
