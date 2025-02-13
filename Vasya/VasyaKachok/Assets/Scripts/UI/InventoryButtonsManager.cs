@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class InventoryButtonsManager : MonoBehaviour
 {
-    public PickupManager pickupManager;
+
     public Inventory inventory;
 
     public Button pickupButton;
@@ -20,12 +20,7 @@ public class InventoryButtonsManager : MonoBehaviour
             ToggleDropWeaponButton(inventory.currentWeapon!=null);
         }
 
-        if (pickupManager != null)
-        {
-            pickupButton.onClick.AddListener(pickupManager.OnPickupButtonClicked);
-            pickupManager.WeaponInPickupZone.AddListener(TogglePickupButton);
-            TogglePickupButton(pickupManager.closestToPickupWeapon != null);
-        }
+
     }
 
     private void ToggleDropWeaponButton(bool isOn)
@@ -33,8 +28,5 @@ public class InventoryButtonsManager : MonoBehaviour
         dropWeaponButton.gameObject.SetActive(isOn);
     }
 
-    private void TogglePickupButton(bool isOn)
-    {
-        pickupButton.gameObject.SetActive(isOn);
-    }
+
 }

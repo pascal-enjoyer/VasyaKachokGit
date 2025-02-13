@@ -1,4 +1,3 @@
-// PlayerMovementController.cs
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -23,6 +22,7 @@ public class PlayerMovementController : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
     }
+
     private void Update()
     {
         HandleMovement();
@@ -31,19 +31,29 @@ public class PlayerMovementController : MonoBehaviour
 
     private void HandleMovement()
     {
+        // Получаем направление от джойстика
         float horizontal = joystick.Horizontal;
         float vertical = joystick.Vertical;
         Vector3 direction = new Vector3(horizontal, 0, vertical).normalized;
 
+        // Получаем нормализованную дистанцию от центра джойстика (от 0 до 1)
+        float normalizedDistance = joystick.Direction.magnitude;
+
         if (direction.magnitude >= 0.1f)
         {
+            // Учитываем поворот камеры
             Quaternion cameraRotation = thirdPersonCamera.GetCameraRotation();
             Vector3 moveDirection = cameraRotation * direction;
             moveDirection.y = 0;
 
+            // Вычисляем текущую скорость с учетом дистанции от центра джойстика
             currentSpeed = isRunning && canRun ? runSpeed : walkSpeed;
+            currentSpeed *= normalizedDistance; // Умножаем скорость на дистанцию от центра
+
+            // Применяем движение
             characterController.SimpleMove(moveDirection * currentSpeed);
 
+            // Плавный поворот персонажа в направлении движения
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
             transform.rotation = Quaternion.Lerp(
                 transform.rotation,
@@ -53,6 +63,7 @@ public class PlayerMovementController : MonoBehaviour
         }
         else
         {
+            // Если джойстик не активен, останавливаем персонажа
             characterController.SimpleMove(Vector3.zero);
         }
     }
@@ -61,18 +72,18 @@ public class PlayerMovementController : MonoBehaviour
     {
         if (characterController.velocity.magnitude > 0.1f)
         {
+            // Изменяем анимацию в зависимости от состояния бега
             animationManager.ChangeAnimation(isRunning && canRun ? "Run" : "Walk");
         }
         else
         {
+            // Если персонаж не двигается, включаем анимацию покоя
             animationManager.ChangeAnimation("Idle");
         }
     }
 
-
-
     public void OnRunButtonPressed()
-{
+    {
         isRunning = true;
     }
 

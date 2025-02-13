@@ -9,5 +9,10 @@ public class WeaponData : ScriptableObject
     public GameObject weaponInHandPrefab;
     public int baseDamage = 10;
 
+    [Header("Для интерфейса")]
+    public Sprite WeaponImageInUI;
+
+
+
 }
 

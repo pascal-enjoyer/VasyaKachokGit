@@ -12,7 +12,8 @@ public class PickupManager : MonoBehaviour
 
     public UnityEvent<bool> WeaponInPickupZone;
 
-
+    public UnityEvent<WeaponData> ClosestToPickupWeaponChanged;
+    
 
 
     private void Update()
@@ -27,6 +28,7 @@ public class PickupManager : MonoBehaviour
             {
                 closestToPickupWeapon = FindClosestWeapon();
             }
+            ClosestToPickupWeaponChanged?.Invoke(closestToPickupWeapon.weaponData);
         }
         
     }
@@ -51,7 +53,6 @@ public class PickupManager : MonoBehaviour
             }
 
         }
-
         return newClosest;
     }
 
