@@ -22,19 +22,85 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float minVerticalAngle = 10f;
     [SerializeField] private float maxVerticalAngle = 80f;
 
+    [Header("Obstacle Avoidance")]
+    [SerializeField] private LayerMask obstacleMask;
+    [SerializeField] private float cameraRadius = 0.2f;
+    [SerializeField] private float adjustmentSpeed = 5f;
+    [SerializeField] private float wallOffset = 0.1f;
+
+    private float currentDistance;
+    private float adjustedDistance;
+    private Vector3 adjustedPosition;
+    private Vector3 direction;
+
     private float currentX = 0f;
     private float currentY = 30f;
     private Vector2 lastTouchPosition;
     private bool isDragging = false;
     private int? touchId = null;
 
+    private void Start()
+    {
+        currentDistance = distance;
+        adjustedDistance = distance;
+    }
     private void LateUpdate()
     {
         if (target == null) return;
 
         UpdateCameraPosition();
         HandleAutoRotation();
+
+        CheckCameraObstacles();
     }
+
+
+    private void CheckCameraObstacles()
+    {
+        direction = cameraTransform.position - (target.position + Vector3.up * heightOffset);
+        RaycastHit hit;
+
+        float targetDistance = distance;
+
+        // Используем SphereCast для учета радиуса камеры
+        if (Physics.SphereCast(
+            target.position + Vector3.up * heightOffset,
+            cameraRadius,
+            direction.normalized,
+            out hit,
+            distance,
+            obstacleMask))
+        {
+            targetDistance = hit.distance - wallOffset;
+        }
+
+        // Плавная корректировка расстояния
+        adjustedDistance = Mathf.Lerp(
+            adjustedDistance,
+            Mathf.Clamp(targetDistance, minDistance, maxDistance),
+            adjustmentSpeed * Time.deltaTime);
+    }
+
+
+    private void UpdateCameraPosition()
+    {
+        Quaternion rotation = Quaternion.Euler(currentY, currentX, 0);
+        Vector3 offset = new Vector3(0, heightOffset, -adjustedDistance);
+        Vector3 desiredPosition = target.position + rotation * offset;
+
+        // Плавное перемещение камеры
+        cameraTransform.position = Vector3.Lerp(
+            cameraTransform.position,
+            desiredPosition,
+            followSpeed * Time.deltaTime);
+
+        // Плавное обновление текущего расстояния
+        currentDistance = Mathf.Lerp(currentDistance, adjustedDistance, followSpeed * Time.deltaTime);
+
+        cameraTransform.LookAt(target.position + Vector3.up * heightOffset);
+    }
+
+
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -115,19 +181,6 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    private void UpdateCameraPosition()
-    {
-        Quaternion rotation = Quaternion.Euler(currentY, currentX, 0);
-        Vector3 offset = new Vector3(0, heightOffset, -distance);
-        Vector3 desiredPosition = target.position + rotation * offset;
-
-        cameraTransform.position = Vector3.Lerp(
-            cameraTransform.position,
-            desiredPosition,
-            followSpeed * Time.deltaTime);
-
-        cameraTransform.LookAt(target.position + Vector3.up * heightOffset);
-    }
 
     public Quaternion GetCameraRotation()
     {

@@ -9534,8 +9534,8 @@ MonoBehaviour:
   joystick: {fileID: 1145935767}
   animationManager: {fileID: 1684114213}
   thirdPersonCamera: {fileID: 1820690533}
-  walkSpeed: 1.5
-  runSpeed: 10
+  walkSpeed: 5
+  runSpeed: 20
   rotationSpeed: 10
 --- !u!114 &1684114213
 MonoBehaviour:
@@ -10704,9 +10704,16 @@ MonoBehaviour:
   rotationSpeed: 0.5
   followSpeed: 10
   heightOffset: 2
-  touchRotationSpeed: 0.1
-  minVerticalAngle: -30
+  touchRotationSpeed: 0.2
+  minVerticalAngle: -20
   maxVerticalAngle: 40
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  cameraRadius: 0.001
+  adjustmentSpeed: 5
+  wallOffset: 0.1
+  distanceRecoveryMultiplier: 2
 --- !u!1001 &1824841215
 PrefabInstance:
   m_ObjectHideFlags: 0
