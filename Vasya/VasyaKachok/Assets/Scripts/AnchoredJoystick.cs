@@ -18,7 +18,7 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
     public UnityEvent RunPressed;
     public UnityEvent RunReleased;
 
-    private float walkRadius => runRadius * 0.85f;
+    private float walkRadius => runRadius * 0.65f;
     private Vector2 input = Vector2.zero;
     private Vector2 joystickCenter;
     private int currentPointerId = -1;

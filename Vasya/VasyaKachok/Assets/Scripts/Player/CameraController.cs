@@ -7,7 +7,7 @@ public class CameraController : MonoBehaviour
     [Header("References")]
     [SerializeField] private Transform target;
     [SerializeField] private Transform cameraTransform;
-    [SerializeField] private RectTransform touchAreaPanel; // UI панель для зоны касания
+    [SerializeField] private RectTransform touchAreaPanel;
 
     [Header("Settings")]
     [SerializeField] private float distance = 5f;
@@ -19,56 +19,90 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float touchRotationSpeed = 0.1f;
 
     [Header("Angle Restrictions")]
-    [SerializeField] private float minVerticalAngle = 10f; // Минимальный угол наклона
-    [SerializeField] private float maxVerticalAngle = 80f; // Максимальный угол наклона
+    [SerializeField] private float minVerticalAngle = 10f;
+    [SerializeField] private float maxVerticalAngle = 80f;
 
     private float currentX = 0f;
     private float currentY = 30f;
-
-    private bool rotating = false;
+    private Vector2 lastTouchPosition;
+    private bool isDragging = false;
+    private int? touchId = null;
 
     private void LateUpdate()
     {
         if (target == null) return;
-        
-        HandleCameraRotation();
+
         UpdateCameraPosition();
+        HandleAutoRotation();
     }
 
-    public void HandleTouchRotation(Vector2 touchPos)
+    public void OnPointerDown(PointerEventData eventData)
     {
-        Vector2 deltaPosition = touchPos;
-        currentX += deltaPosition.x * touchRotationSpeed;
-        currentY -= deltaPosition.y * touchRotationSpeed;
+        if (!IsValidTouch(eventData)) return;
 
-        // Ограничение вертикального угла
+        touchId = eventData.pointerId;
+        lastTouchPosition = eventData.position;
+        isDragging = true;
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (!isDragging || touchId != eventData.pointerId) return;
+
+        Vector2 delta = eventData.position - lastTouchPosition;
+        lastTouchPosition = eventData.position;
+
+        HandleCameraRotation(delta);
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        if (touchId == eventData.pointerId)
+        {
+            isDragging = false;
+            touchId = null;
+        }
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (touchId == eventData.pointerId)
+        {
+            isDragging = false;
+            touchId = null;
+        }
+    }
+
+    public void HandleCameraRotation(Vector2 delta)
+    {
+        currentX += delta.x * touchRotationSpeed;
+        currentY -= delta.y * touchRotationSpeed;
         currentY = Mathf.Clamp(currentY, minVerticalAngle, maxVerticalAngle);
-     
     }
 
-    public void ToggleUserRotation(bool isInPanel)
+    public bool IsValidTouch(PointerEventData eventData)
     {
-        rotating = isInPanel;
-    }
+        // Проверка на другие UI элементы
+        if (EventSystem.current.currentSelectedGameObject != null) return false;
 
-    private bool IsTouchInPanel(Vector2 touchPosition)
-    {
-        // Конвертируем позицию касания в локальные координаты панели
+        // Проверка зоны касания
         Vector2 localPoint;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
             touchAreaPanel,
-            touchPosition,
+            eventData.position,
             null,
-            out localPoint);
+            out localPoint))
+        {
+            return false;
+        }
 
-        // Проверяем находится ли точка внутри прямоугольника панели
         return touchAreaPanel.rect.Contains(localPoint);
     }
 
-    private void HandleCameraRotation()
+    private void HandleAutoRotation()
     {
         CharacterController controller = target.GetComponent<CharacterController>();
-        if (controller == null) return;
+        if (controller == null || isDragging) return;
 
         if (controller.velocity.magnitude > 0.1f)
         {

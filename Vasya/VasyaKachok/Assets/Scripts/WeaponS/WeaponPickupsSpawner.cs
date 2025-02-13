@@ -8,6 +8,11 @@ public class WeaponPickupsSpawner : MonoBehaviour
     public Vector3 posToSpawn;
     public WeaponData test;
 
+    private void Start()
+    {
+        Application.targetFrameRate = 60;    
+    }
+
     public void SpawnPickupWeapon(/*WeaponData test, Vector3 posToSpawn*/)
     {
         GameObject newPickup = Instantiate(weaponPickupPrefab, posToSpawn, Quaternion.identity, transform);
