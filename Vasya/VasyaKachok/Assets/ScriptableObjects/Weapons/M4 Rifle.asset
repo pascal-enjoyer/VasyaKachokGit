@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc3c42be7c5f2c54c835fe79b15147aa, type: 3}
-  m_Name: Bat
+  m_Name: M4 Rifle
   m_EditorClassIdentifier: 
-  weaponName: Bat
-  weaponPickupPrefab: {fileID: 6893058034455453083, guid: a2436977a17bcd1438a21db5af156df2, type: 3}
-  weaponInHandPrefab: {fileID: 6717899613153869531, guid: 5ea19b7c947048a49b3c76db1bf77e42, type: 3}
-  baseDamage: 50
-  WeaponImageInUI: {fileID: 21300000, guid: 2bf8e69d43b481043a75a6e851ccea17, type: 3}
+  weaponName: M4 Rifle
+  weaponPickupPrefab: {fileID: 7844178690934817418, guid: 864d9944b1755bf4d96d36849b251945, type: 3}
+  weaponInHandPrefab: {fileID: 6265825896019426064, guid: d65f15c647924954181dec1f4cd80ce4, type: 3}
+  baseDamage: 10
+  WeaponImageInUI: {fileID: 21300000, guid: a931111336285ad4e959a4167eeac090, type: 3}

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc3c42be7c5f2c54c835fe79b15147aa, type: 3}
-  m_Name: Bat
+  m_Name: Broken Bottle
   m_EditorClassIdentifier: 
-  weaponName: Bat
-  weaponPickupPrefab: {fileID: 6893058034455453083, guid: a2436977a17bcd1438a21db5af156df2, type: 3}
-  weaponInHandPrefab: {fileID: 6717899613153869531, guid: 5ea19b7c947048a49b3c76db1bf77e42, type: 3}
-  baseDamage: 50
-  WeaponImageInUI: {fileID: 21300000, guid: 2bf8e69d43b481043a75a6e851ccea17, type: 3}
+  weaponName: Broken Bottle
+  weaponPickupPrefab: {fileID: 3483826312947555054, guid: b25c9dedad4892c48aabf9ca1e33a60a, type: 3}
+  weaponInHandPrefab: {fileID: 6213277762016743842, guid: efa8f2340fb8f4741a7e5cf25c9948ea, type: 3}
+  baseDamage: 10
+  WeaponImageInUI: {fileID: 21300000, guid: ddde519be351e9e46bc07cbcf0cb1159, type: 3}

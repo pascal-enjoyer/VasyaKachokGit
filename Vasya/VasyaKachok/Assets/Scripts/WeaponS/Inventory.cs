@@ -38,7 +38,10 @@ public class Inventory : MonoBehaviour
 
         // Создаем новый экземпляр
         currentWeapon = Instantiate(data.weaponInHandPrefab, weaponParent);
-        EquipedWeapon weaponComponent = currentWeapon.GetComponent<EquipedWeapon>();
+        if (!currentWeapon.TryGetComponent<EquipedWeapon>(out EquipedWeapon weaponComponent))
+        {
+            weaponComponent = currentWeapon.AddComponent<EquipedWeapon>();
+        }
         weaponComponent.Initialize(data, rarity);
         WeaponEquiped?.Invoke(true);
 

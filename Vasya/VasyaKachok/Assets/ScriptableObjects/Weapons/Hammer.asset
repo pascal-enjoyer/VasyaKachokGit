@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Hammer
   weaponPickupPrefab: {fileID: 2646877442296509112, guid: 30374b034f7d2354490d0b57cc45aab6, type: 3}
-  weaponInHandPrefab: {fileID: 7668472787617509802, guid: 0a3292d21e52eb548901e494103d925b, type: 3}
+  weaponInHandPrefab: {fileID: 3476124657931549021, guid: 0a3292d21e52eb548901e494103d925b, type: 3}
   baseDamage: 100
   WeaponImageInUI: {fileID: 21300000, guid: ff12c1b3c6b6bee4996be9f604514a43, type: 3}

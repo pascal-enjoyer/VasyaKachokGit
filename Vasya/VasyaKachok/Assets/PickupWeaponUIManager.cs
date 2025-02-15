@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,8 @@ public class PickupWeaponUIManager : MonoBehaviour
     {
         pickupManager.ClosestToPickupWeaponChanged.AddListener(OnClosestToPickupWeaponChanged);
         pickupManager.WeaponInPickupZone.AddListener(OnWeaponInPickupZone);
+
+        pickupButton.onClick.AddListener(pickupManager.OnPickupButtonClicked);
 
         OnWeaponInPickupZone(pickupManager.closestToPickupWeapon != null);
     }
