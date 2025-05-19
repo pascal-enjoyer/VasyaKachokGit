@@ -11,7 +11,8 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
     [SerializeField] private Canvas canvas;
 
     [Header("Events")]
-    public UnityEvent<Vector2> OnValueChanged;
+    public UnityEvent<Vector2> OnValueChanged; // Отправляет направление (x, y)
+    public UnityEvent<float> OnDistanceChanged; // Новое событие: 0-1 расстояние от центра
 
     private float backgroundRadius;
     private Vector2 input = Vector2.zero;
@@ -21,13 +22,12 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
     public float Horizontal => input.x;
     public float Vertical => input.y;
     public Vector2 Direction => input;
+    public float Distance => input.magnitude; // Новое свойство для прямого доступа
 
     private void Start()
     {
         InitializeJoystick();
     }
-
-
 
     private void InitializeJoystick()
     {
@@ -37,7 +37,6 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
         eventCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ?
             null : canvas.worldCamera;
 
-        // Calculate radius based on the smallest dimension (to ensure it's a circle)
         backgroundRadius = Mathf.Min(background.rect.width, background.rect.height) / 2f;
     }
 
@@ -47,6 +46,8 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
         {
             currentPointerId = eventData.pointerId;
             UpdateHandlePosition(eventData.position);
+
+
         }
     }
 
@@ -54,11 +55,11 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
         if (eventData.pointerId != currentPointerId) return;
         UpdateHandlePosition(eventData.position);
+
     }
 
     private void UpdateHandlePosition(Vector2 screenPosition)
     {
-        // Convert screen position to local position
         Vector2 localPosition;
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
             background,
@@ -66,25 +67,21 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
             eventCamera,
             out localPosition)) return;
 
-        // Calculate direction and clamp to background radius
         Vector2 direction = localPosition;
         float distance = direction.magnitude;
 
-        // Normalize direction within the circular boundary
         if (distance > backgroundRadius)
             direction = direction.normalized * backgroundRadius;
 
-        // Update handle position
         handle.anchoredPosition = direction;
-
-        // Calculate input values with circular normalization
         input = direction / backgroundRadius;
-
-        // Ensure the input is within the unit circle
         input = Vector2.ClampMagnitude(input, 1f);
 
-        // Trigger event with current input values
+        // Вызов обоих событий
         OnValueChanged?.Invoke(input);
+
+        Debug.Log(input.magnitude);
+        OnDistanceChanged?.Invoke(input.magnitude); // Отправляем нормализованное расстояние
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -101,5 +98,6 @@ public class AnchoredJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
         input = Vector2.zero;
         currentPointerId = -1;
         OnValueChanged?.Invoke(input);
+        OnDistanceChanged?.Invoke(0f); // Сбрасываем расстояние в 0
     }
 }

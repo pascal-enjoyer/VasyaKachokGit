@@ -38,9 +38,9 @@ public class Inventory : MonoBehaviour
 
         // —оздаем новый экземпл€р
         currentWeapon = Instantiate(data.weaponInHandPrefab, weaponParent);
-        if (!currentWeapon.TryGetComponent<EquipedWeapon>(out EquipedWeapon weaponComponent))
+        if (!currentWeapon.TryGetComponent<WeaponBase>(out WeaponBase weaponComponent))
         {
-            weaponComponent = currentWeapon.AddComponent<EquipedWeapon>();
+            weaponComponent = currentWeapon.AddComponent<WeaponBase>();
         }
         weaponComponent.Initialize(data, rarity);
         WeaponEquiped?.Invoke(true);
@@ -52,7 +52,7 @@ public class Inventory : MonoBehaviour
         // ”дал€ем текущее оружие
         foreach (Transform child in weaponParent)
         {
-            if (child.TryGetComponent<EquipedWeapon>(out EquipedWeapon eqWeapon))
+            if (child.TryGetComponent<WeaponBase>(out WeaponBase eqWeapon))
             {
                 pickupSpawner.SpawnPickupWeapon(eqWeapon.weaponData, eqWeapon.rarity, 
                                                 transform.position + new Vector3(Random.Range(-2f, 2f),
