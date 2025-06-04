@@ -2,12 +2,8 @@ using UnityEngine;
 
 public interface IWeapon
 {
-    public enum WeaponType
-    {
-        Melee,
-        Range
-    }
 
+    WeaponData.WeaponType GetWeaponType();
     void Use();
     void Reload();
     float GetCooldown();

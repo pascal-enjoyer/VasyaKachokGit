@@ -1,16 +1,11 @@
-// Inventory.cs
-
 using UnityEngine;
 using UnityEngine.Events;
-
 
 public enum WeaponRarity { Common, Rare, Legendary }
 
 public class Inventory : MonoBehaviour
 {
-
     [System.Serializable]
-
     public class WeaponInstance
     {
         public WeaponData data;
@@ -19,10 +14,19 @@ public class Inventory : MonoBehaviour
 
     public GameObject currentWeapon;
     public Transform weaponParent;
-    
     public WeaponPickupsSpawner pickupSpawner;
-
     public UnityEvent<bool> WeaponEquiped;
+
+    private CharacterCombat characterCombat;
+
+    private void Awake()
+    {
+        characterCombat = GetComponent<CharacterCombat>();
+        if (characterCombat == null)
+        {
+            Debug.LogError("CharacterCombat не найден на объекте с Inventory!");
+        }
+    }
 
     public void AddWeapon(WeaponData newData, WeaponRarity newRarity)
     {
@@ -36,33 +40,45 @@ public class Inventory : MonoBehaviour
             DropWeapon();
         }
 
-        // —оздаем новый экземпл€р
+        // —оздаЄм экземпл€р оружи€
         currentWeapon = Instantiate(data.weaponInHandPrefab, weaponParent);
         if (!currentWeapon.TryGetComponent<WeaponBase>(out WeaponBase weaponComponent))
         {
-            weaponComponent = currentWeapon.AddComponent<WeaponBase>();
+            Debug.LogError("Prefab оружи€ должен содержать WeaponBase!");
+            return;
         }
-        weaponComponent.Initialize(data, rarity);
-        WeaponEquiped?.Invoke(true);
 
+        weaponComponent.Initialize(data, rarity);
+
+        // —в€зать с CharacterCombat
+        if (characterCombat != null)
+        {
+            characterCombat.EquipWeapon(weaponComponent); // передаЄм как IWeapon
+        }
+
+        WeaponEquiped?.Invoke(true);
     }
 
     public void DropWeapon()
     {
-        // ”дал€ем текущее оружие
         foreach (Transform child in weaponParent)
         {
             if (child.TryGetComponent<WeaponBase>(out WeaponBase eqWeapon))
             {
-                pickupSpawner.SpawnPickupWeapon(eqWeapon.weaponData, eqWeapon.rarity, 
+                pickupSpawner.SpawnPickupWeapon(eqWeapon.weaponData, eqWeapon.rarity,
                                                 transform.position + new Vector3(Random.Range(-2f, 2f),
                                                                                  0.5f,
                                                                                  Random.Range(-2f, 2f)));
             }
             Destroy(child.gameObject);
         }
+
         WeaponEquiped?.Invoke(false);
         currentWeapon = null;
 
+        if (characterCombat != null)
+        {
+            characterCombat.UnequipWeapon();
+        }
     }
 }

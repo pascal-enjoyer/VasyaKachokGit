@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: PoliceMan
   m_EditorClassIdentifier: 
   enemyName: Icegergert
-  health: 1000
+  enemyType: 0
+  enemyPrefab: {fileID: 3051719832380469, guid: eacb415a151be824b862eade98ab5b45, type: 3}
+  maxHealth: 100
+  moveSpeed: 2
+  chaseRange: 20
   baseDamage: 20
-  enemyPrefab: {fileID: 2699679072600159106, guid: 23820bf8915440f46b0b83cd7fadec51, type: 3}
   attackRange: 1.25
-  chaseRange: 10
-  attackCooldown: 2
-  moveSpeed: 5
+  attackSpeed: 0
+  startWeapon: {fileID: 11400000, guid: acdfd2aa15bf4624f9a597d87e4b5095, type: 2}
+  preferredDistance: 2

@@ -3,12 +3,20 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemyData", menuName = "Enemies/EnemyData")]
 public class EnemyData : ScriptableObject
 {
+    public enum EnemyType { Melee, Ranged, Special }
+
+    [Header("General")]
     public string enemyName;
-    public int health;
-    public int baseDamage;
+    public EnemyType enemyType;
     public GameObject enemyPrefab;
-    public float attackRange;
-    public float chaseRange;
-    public float attackCooldown;
-    public float moveSpeed;
+    public int maxHealth = 100;
+    public float moveSpeed = 3f;
+    public float chaseRange = 10f;
+
+    [Header("Combat")]
+    public int baseDamage = 10;
+    public float attackRange = 2f;
+    public float attackSpeed = 1f;
+    public WeaponData startWeapon;
+    public float preferredDistance = 2f;
 }

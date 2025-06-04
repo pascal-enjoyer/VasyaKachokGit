@@ -9,7 +9,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     [SerializeField] protected float cooldown = 1f;
     protected float lastUseTime;
 
-    [SerializeField] protected float currentDamage;
+    [SerializeField] protected int currentDamage;
 
     protected CharacterCombat owner;
 
@@ -37,7 +37,6 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         lastUseTime = Time.time;
     }
 
-    public abstract IWeapon.WeaponType GetWeaponType();
 
     public void Initialize(WeaponData data, WeaponRarity newRarity)
     {
@@ -48,5 +47,10 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     void InitializeWeapon()
     {
         currentDamage = WeaponManager.CalculateStats(weaponData, rarity);
+    }
+
+    public WeaponData.WeaponType GetWeaponType()
+    {
+        return weaponData.weaponType;
     }
 }

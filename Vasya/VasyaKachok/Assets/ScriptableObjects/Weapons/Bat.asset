@@ -12,8 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc3c42be7c5f2c54c835fe79b15147aa, type: 3}
   m_Name: Bat
   m_EditorClassIdentifier: 
+  weaponType: 0
   weaponName: Bat
   weaponPickupPrefab: {fileID: 6893058034455453083, guid: a2436977a17bcd1438a21db5af156df2, type: 3}
   weaponInHandPrefab: {fileID: 6717899613153869531, guid: 5ea19b7c947048a49b3c76db1bf77e42, type: 3}
-  baseDamage: 50
+  baseDamage: 10
+  damageByRarityMultiplier: 1.25
+  attackSpeed: 1
+  attackSpeedByRarityMultiplier: 1
   WeaponImageInUI: {fileID: 21300000, guid: 2bf8e69d43b481043a75a6e851ccea17, type: 3}
+  comboData: {fileID: 11400000, guid: c80695b68ff3a1f4ab2b9660dd8ea786, type: 2}

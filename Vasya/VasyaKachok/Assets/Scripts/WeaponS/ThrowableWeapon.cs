@@ -52,8 +52,4 @@ public class ThrowableWeapon : WeaponBase
         return cooldown;
     }
 
-    public override IWeapon.WeaponType GetWeaponType()
-    {
-        return IWeapon.WeaponType.Range;
-    }
 }

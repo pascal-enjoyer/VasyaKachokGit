@@ -1,8 +1,8 @@
 using UnityEngine;
 
-// Интерфейс для атаки
 public interface IAttackable
 {
-    void Attack(IDamageable damageable); 
-    float GetAttackCooldown();
+    void Attack(IDamagable target);
+    float GetAttackRange();
+    float GetAttackSpeed();
 }

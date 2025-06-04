@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 33959047813740410}
   - component: {fileID: 9140114599292239659}
   - component: {fileID: 8952480586491171763}
+  - component: {fileID: -7829598402424860107}
+  - component: {fileID: 3409961153869356692}
   m_Layer: 6
   m_Name: BatInHand
   m_TagString: Untagged
@@ -86,3 +88,42 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &-7829598402424860107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6717899613153869531}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 949f26c300635104987e3d09fff5cc39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponData: {fileID: 0}
+  rarity: 0
+  cooldown: 1
+  currentDamage: 0
+  hitboxCollider: {fileID: 3409961153869356692}
+  damage: 0
+--- !u!65 &3409961153869356692
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6717899613153869531}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 0.005, y: 0.005, z: 0.02}
+  m_Center: {x: 0, y: 0, z: 0.01}

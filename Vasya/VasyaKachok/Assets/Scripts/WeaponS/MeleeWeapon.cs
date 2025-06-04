@@ -1,44 +1,54 @@
 using UnityEngine;
-using System.Collections;
 
 public class MeleeWeapon : WeaponBase
 {
     [SerializeField] private Collider hitboxCollider;
-    [SerializeField] private float damage;
+    
 
     public override void Use()
     {
-        if (!CanUse()) return;
-
-        StartCoroutine(PerformMeleeAttack());
+        if (!CanUse())
+        {
+            //Debug.LogWarning("Weapon on cooldown!");
+            return;
+        }
         RegisterUseTime();
+        //Debug.Log("MeleeWeapon Use called");
     }
 
-    private IEnumerator PerformMeleeAttack()
+    public void EnableHitbox()
     {
-        hitboxCollider.enabled = true;
-        yield return new WaitForSeconds(0.3f);
-        hitboxCollider.enabled = false;
+        if (hitboxCollider != null)
+        {
+            hitboxCollider.enabled = true;
+            //Debug.Log("Hitbox enabled");
+        }
+    }
+
+    public void DisableHitbox()
+    {
+        if (hitboxCollider != null)
+        {
+            hitboxCollider.enabled = false;
+            //Debug.Log("Hitbox disabled");
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("nihuya udar nachalsya");
         if (!hitboxCollider.enabled) return;
 
-        IDamageable target = other.GetComponent<IDamageable>();
-        if (target != null)
+        Debug.Log("nihuya udar zashitalsya pochti");
+        if (other.TryGetComponent<IDamagable>(out IDamagable target))
         {
-            target.TakeDamage(damage);
+            target.TakeDamage(currentDamage);
+            Debug.Log($"Dealt {currentDamage} damage to {other.name}");
         }
     }
 
     public override void Reload()
     {
-        // Ближнему оружию перезарядка не нужна
-    }
-
-    public override IWeapon.WeaponType GetWeaponType()
-    {
-        return IWeapon.WeaponType.Melee;
+        lastUseTime = Time.time - cooldown;
     }
 }

@@ -4,7 +4,7 @@ public class Projectile : MonoBehaviour
 {
     [SerializeField] private float speed = 20f;
     [SerializeField] private float lifetime = 5f;
-    [SerializeField] private float damage = 10f;
+    [SerializeField] private int damage = 10;
     [SerializeField] private Rigidbody rb;
 
     private GameObject owner;
@@ -34,7 +34,7 @@ public class Projectile : MonoBehaviour
         if (other.gameObject == owner)
             return;
 
-        IDamageable target = other.GetComponent<IDamageable>();
+        IDamagable target = other.GetComponent<IDamagable>();
         if (target != null)
         {
             target.TakeDamage(damage);

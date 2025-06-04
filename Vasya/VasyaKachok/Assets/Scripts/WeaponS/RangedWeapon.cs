@@ -30,9 +30,4 @@ public class RangedWeapon : WeaponBase
         currentAmmo = maxAmmo;
         Debug.Log("Перезарядка завершена.");
     }
-
-    public override IWeapon.WeaponType GetWeaponType()
-    {
-        return IWeapon.WeaponType.Range;
-    }
 }

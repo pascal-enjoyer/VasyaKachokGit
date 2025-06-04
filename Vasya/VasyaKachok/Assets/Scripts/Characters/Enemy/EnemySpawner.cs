@@ -1,17 +1,19 @@
-
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class EnemySpawner : MonoBehaviour
 {
-    EnemyManager enemyManager;
 
-    public List<EnemyData> enemyVariables;
+    [SerializeField] private EnemyManager enemyManager;
+    [SerializeField] private List<EnemyData> enemyDataList;
+    [SerializeField] private List<Transform> spawnPoints;
 
     public void SpawnEnemy()
     {
-        Instantiate(enemyVariables[Random.Range(0, enemyVariables.Count)].enemyPrefab, 
-            new Vector3(Random.Range(-10, 10), 0.1f, Random.Range(-10, 10)), 
-            Quaternion.identity, transform);
+        if (enemyDataList.Count == 0 || spawnPoints.Count == 0) return;
+
+        EnemyData data = enemyDataList[Random.Range(0, enemyDataList.Count)];
+        Vector3 position = spawnPoints[Random.Range(0, spawnPoints.Count)].position;
+        enemyManager.SpawnEnemy(data, position);
     }
 }
