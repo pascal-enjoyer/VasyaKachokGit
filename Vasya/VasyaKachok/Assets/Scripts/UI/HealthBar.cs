@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EnemyHealthBar : MonoBehaviour
+public class HealthBar : MonoBehaviour
 {
     [SerializeField] private Image healthBarFill;
     [SerializeField] private float displayTime = 3f;
@@ -10,21 +10,16 @@ public class EnemyHealthBar : MonoBehaviour
     private EnemyHealth enemyHealth;
     private Collider enemyCollider;
     private Canvas healthBarCanvas;
-    private Camera mainCamera;
     private float hideTimer;
     private bool isVisible;
 
     private void Awake()
     {
         healthBarCanvas = GetComponent<Canvas>();
-        mainCamera = Camera.main;
-        if (healthBarFill == null)
+        if (healthBarFill == null || healthBarCanvas == null)
         {
-            Debug.LogError("HealthBarFill Image is not assigned!", this);
-        }
-        if (healthBarCanvas == null)
-        {
-            Debug.LogError("Canvas component is missing!", this);
+            //Debug.LogError("HealthBarFill or Canvas not assigned!", this);
+            Destroy(gameObject);
         }
         if (healthBarFill.type != Image.Type.Filled)
         {
@@ -40,7 +35,7 @@ public class EnemyHealthBar : MonoBehaviour
         enemyCollider = enemy.GetComponent<Collider>();
         if (enemyCollider == null)
         {
-            Debug.LogError("Enemy Collider is not found!", enemy);
+            //Debug.LogError("Enemy Collider not found!", enemy);
             Destroy(gameObject);
             return;
         }
@@ -57,17 +52,15 @@ public class EnemyHealthBar : MonoBehaviour
         Vector3 colliderTop = enemyCollider.bounds.center + Vector3.up * (enemyCollider.bounds.extents.y + heightOffset);
         transform.position = colliderTop;
 
-        if (mainCamera != null)
-        {
-            transform.LookAt(transform.position + mainCamera.transform.forward);
-        }
+        transform.LookAt(transform.position + Camera.main.transform.forward);
 
         if (isVisible && hideTimer > 0)
         {
             hideTimer -= Time.deltaTime;
             if (hideTimer <= 0)
             {
-                HideHealthBar();
+                healthBarCanvas.enabled = false;
+                isVisible = false;
             }
         }
     }
@@ -80,24 +73,9 @@ public class EnemyHealthBar : MonoBehaviour
         UpdateHealthBar();
     }
 
-    public void HideHealthBar()
-    {
-        healthBarCanvas.enabled = false;
-        isVisible = false;
-    }
-
     public void UpdateHealthBar()
     {
         if (enemyHealth == null) return;
-        float healthPercentage = (float)enemyHealth.GetCurrentHealth() / enemyHealth.GetMaxHealth();
-        healthBarFill.fillAmount = Mathf.Clamp01(healthPercentage);
-    }
-
-    private void OnDestroy()
-    {
-        if (enemyHealth != null && HealthBarManager.Instance != null)
-        {
-            HealthBarManager.Instance.RemoveHealthBar(enemyHealth);
-        }
+        healthBarFill.fillAmount = (float)enemyHealth.GetCurrentHealth() / enemyHealth.GetMaxHealth();
     }
 }

@@ -186,7 +186,7 @@ public class EnemyBase : MonoBehaviour
     {
         animatorController?.ChangeAnimation(DeathAnimation);
         navAgent.isStopped = true;
-        Destroy(gameObject, 2f);
+        Destroy(gameObject, 15f);
     }
 
     protected virtual void Patrol()

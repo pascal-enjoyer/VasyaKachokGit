@@ -19,7 +19,7 @@ public class RangedWeapon : WeaponBase
 
         GameObject proj = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         Projectile projectile = proj.GetComponent<Projectile>();
-        projectile.SetOwner(owner.gameObject);
+        //projectile.SetOwner(owner.gameObject);
 
         currentAmmo--;
         RegisterUseTime();

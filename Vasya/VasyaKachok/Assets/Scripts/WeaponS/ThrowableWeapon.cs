@@ -34,7 +34,7 @@ public class ThrowableWeapon : WeaponBase
         Projectile projectile = obj.GetComponent<Projectile>();
         if (projectile != null)
         {
-            projectile.SetOwner(owner.gameObject);
+            //projectile.SetOwner(owner.gameObject);
         }
 
         currentAmmo--;
@@ -47,9 +47,9 @@ public class ThrowableWeapon : WeaponBase
         Debug.Log("Метательное оружие перезаряжено.");
     }
 
-    public override float GetCooldown()
+/*    public override float GetCooldown()
     {
         return cooldown;
-    }
+    }*/
 
 }

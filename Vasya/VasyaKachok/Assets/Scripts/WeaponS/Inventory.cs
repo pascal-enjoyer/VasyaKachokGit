@@ -3,7 +3,7 @@ using UnityEngine.Events;
 
 public enum WeaponRarity { Common, Rare, Legendary }
 
-public class Inventory : MonoBehaviour
+public class Inventory : MonoBehaviour 
 {
     [System.Serializable]
     public class WeaponInstance

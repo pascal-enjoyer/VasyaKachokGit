@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42324c06f1362b24c9af353b618e9509, type: 3}
   m_Name: meleeDefault
   m_EditorClassIdentifier: 
-  comboAnimationStates:
-  - 1melee
-  - 2melee
-  - 3melee
+  comboAnimationClips:
+  - {fileID: -203655887218126122, guid: fee00f7ddefd93c43ade04b64f6c01e0, type: 3}
+  - {fileID: -203655887218126122, guid: 4d263bd578c8dab45a72bd3305e058cc, type: 3}
+  - {fileID: -203655887218126122, guid: c99630f2e65d74049820d9f273618c98, type: 3}

@@ -44,7 +44,7 @@ public class AttackButtonManager : MonoBehaviour, IPointerDownHandler
         TryAttack();
         lastAttackTime = Time.time;
         TriggerButtonFeedback();
-        Handheld.Vibrate();
+        //Handheld.Vibrate();
     }
 
     private void Update()
@@ -57,7 +57,7 @@ public class AttackButtonManager : MonoBehaviour, IPointerDownHandler
                 lastAttackTime = Time.time;
                 inputBuffer.Dequeue();
                 TriggerButtonFeedback();
-                Handheld.Vibrate();
+                //Handheld.Vibrate();
             }
             else
             {
@@ -76,7 +76,7 @@ public class AttackButtonManager : MonoBehaviour, IPointerDownHandler
             IWeapon weapon = characterCombat.GetCurrentWeapon();
             if (weapon is WeaponBase)
             {
-                characterCombat.UseWeapon();
+                characterCombat.TryAttack();
             }
             else
             {

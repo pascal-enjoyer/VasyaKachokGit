@@ -1,18 +1,26 @@
 using UnityEngine;
-using System;
+using UnityEngine.Events;
 
 public class EnemyHealth : MonoBehaviour, IDamagable, IEnemyDataUser
 {
-    public static event Action<EnemyHealth> EnemyDamageTaken;
+    [SerializeField] private GameObject healthBarPrefab;
 
     private EnemyBase enemyBase;
     private EnemyData enemyData;
     private int currentHealth;
     private int maxHealth => enemyData.maxHealth;
+    private HealthBar healthBar;
+
+    public UnityEvent EnemyTookDamage;
+    public UnityEvent EnemyDie;
 
     private void Awake()
     {
         enemyBase = GetComponent<EnemyBase>();
+        if (healthBarPrefab == null)
+        {
+            Debug.LogError("HealthBar Prefab not assigned!", this);
+        }
     }
 
     private void Start()
@@ -35,38 +43,46 @@ public class EnemyHealth : MonoBehaviour, IDamagable, IEnemyDataUser
     {
         currentHealth = Mathf.Max(currentHealth - damage, 0);
         Debug.Log($"Enemy {gameObject.name} health: {currentHealth}");
-        EnemyDamageTaken?.Invoke(this);
-        if (currentHealth <= 0)
+        
+        if (healthBar == null && healthBarPrefab != null && currentHealth > 0)
         {
-            if (HealthBarManager.Instance != null)
+            GameObject healthBarGO = Instantiate(healthBarPrefab, transform);
+            healthBar = healthBarGO.GetComponent<HealthBar>();
+            if (healthBar != null)
             {
-                HealthBarManager.Instance.RemoveHealthBar(this);
+                healthBar.Initialize(this);
+            }
+            else
+            {
+                Debug.LogError("HealthBar component not found on instantiated prefab!", healthBarGO);
+                Destroy(healthBarGO);
             }
         }
+
+        if (healthBar != null)
+        {
+            healthBar.ShowHealthBar();
+        }
+
+        if (currentHealth <= 0)
+        {
+            // Логика смерти врага
+            EnemyDie?.Invoke();
+
+            Destroy(gameObject, 100000);
+            
+            return;
+        }
+        EnemyTookDamage?.Invoke();
     }
 
-    public Transform GetTransform()
-    {
-        return transform;
-    }
+    public Transform GetTransform() => transform;
 
-    public void Kill()
-    {
-        TakeDamage(currentHealth);
-    }
+    public void Kill() => TakeDamage(currentHealth);
 
-    public bool IsAlive()
-    {
-        return currentHealth > 0;
-    }
+    public bool IsAlive() => currentHealth > 0;
 
-    public int GetCurrentHealth()
-    {
-        return currentHealth;
-    }
+    public int GetCurrentHealth() => currentHealth;
 
-    public int GetMaxHealth()
-    {
-        return maxHealth;
-    }
+    public int GetMaxHealth() => maxHealth;
 }

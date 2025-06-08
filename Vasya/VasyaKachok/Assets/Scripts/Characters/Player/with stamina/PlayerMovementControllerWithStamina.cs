@@ -6,7 +6,7 @@ public class PlayerMovementControllerWithStamina : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private AnchoredJoystick joystick;
-    [SerializeField] private PlayerAnimationManager animationManager;
+    [SerializeField] private PlayerAnimationSystem animationManager;
     [SerializeField] private CameraController thirdPersonCamera;
     [SerializeField] private StaminaManager staminaManager;
 
@@ -74,11 +74,11 @@ public class PlayerMovementControllerWithStamina : MonoBehaviour
     {
         if (characterController.velocity.magnitude > 0.1f)
         {
-            animationManager.ChangeAnimation(isRunning && canRun ? "Run" : "Walk");
+            animationManager.PlayAnimation(isRunning && canRun ? "Run" : "Walk");
         }
         else
         {
-            animationManager.ChangeAnimation("Idle");
+            animationManager.PlayAnimation("Idle");
         }
     }
 

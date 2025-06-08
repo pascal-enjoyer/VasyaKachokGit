@@ -42,7 +42,7 @@ public class CameraController : MonoBehaviour
 
 
     [SerializeField] private Rect normalizedScreenTargetArea = new Rect(0.4f, 0.3f, 0.2f, 0.4f); // Центральная область
-    [SerializeField] private float snapRotationSpeed = 360f; // Скорость доворота
+    //[SerializeField] private float snapRotationSpeed = 360f; // Скорость доворота
 
     private void Start()
     {
@@ -190,8 +190,10 @@ public class CameraController : MonoBehaviour
 
     public void RotateTowardsTarget(GameObject enemyTarget)
     {
+        Debug.Log("asd");
         if (enemyTarget == null) return;
 
+        Debug.Log("asd2");
         Vector3 targetLookPoint = enemyTarget.transform.position + Vector3.up * 1.5f;
         Vector3 directionToTarget = targetLookPoint - cameraTransform.position;
 

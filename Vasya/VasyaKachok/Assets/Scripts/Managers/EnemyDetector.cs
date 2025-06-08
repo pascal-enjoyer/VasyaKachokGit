@@ -15,6 +15,8 @@ public class EnemyDetector : MonoBehaviour
     private SpriteRenderer currentMarker;
     private Camera mainCamera;
 
+    private GameObject currentClosestEnemy;
+
     private void Start()
     {
         if (characterCombat == null)
@@ -42,12 +44,17 @@ public class EnemyDetector : MonoBehaviour
     {
         GameObject closestEnemy = FindClosestEnemy(transform.position);
 
-        if (closestEnemy != null && currentMarker == null)
+        if (closestEnemy != null)
         {
-            characterCombat.SetTarget(closestEnemy);
-            ShowMarkerBelow(closestEnemy);
+            if (closestEnemy != currentClosestEnemy)
+            {
+                characterCombat.SetTarget(closestEnemy);
+                Debug.Log("Nashel");
+                ShowMarkerBelow(closestEnemy);
+                currentClosestEnemy = closestEnemy;
+            }
         }
-        else if (closestEnemy == null && currentMarker !=null)
+        else if (closestEnemy == null && currentMarker != null)
         {
             characterCombat.SetTarget(null);
             RemoveMarker();

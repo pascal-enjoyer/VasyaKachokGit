@@ -1,27 +1,47 @@
 using UnityEngine;
+using System.Collections.Generic;
 
-public class MeleeWeapon : WeaponBase
+public class MeleeWeapon : WeaponBase, IHitboxWeapon
 {
     [SerializeField] private Collider hitboxCollider;
-    
+
+    private HashSet<Collider> hitTargets;
+    private bool hitboxWasDisabled;
+
+    private void Awake()
+    {
+        if (hitboxCollider == null)
+        {
+            Debug.LogError("Hitbox Collider not assigned!", this);
+        }
+        else
+        {
+            hitboxCollider.enabled = false;
+        }
+        hitTargets = new HashSet<Collider>();
+        hitboxWasDisabled = true;
+    }
 
     public override void Use()
     {
-        if (!CanUse())
+        if (hitboxCollider.enabled)
         {
-            //Debug.LogWarning("Weapon on cooldown!");
-            return;
+            Debug.LogWarning($"Hitbox was not disabled from previous attack on {gameObject.name}! Forcing disable.");
+            DisableHitbox();
         }
+        Debug.Log("Weapon Used");
         RegisterUseTime();
-        //Debug.Log("MeleeWeapon Use called");
+        EnableHitbox();
+        hitboxWasDisabled = false;
     }
 
     public void EnableHitbox()
     {
         if (hitboxCollider != null)
         {
+            hitTargets.Clear();
             hitboxCollider.enabled = true;
-            //Debug.Log("Hitbox enabled");
+            Debug.Log("Hitbox enabled");
         }
     }
 
@@ -30,20 +50,24 @@ public class MeleeWeapon : WeaponBase
         if (hitboxCollider != null)
         {
             hitboxCollider.enabled = false;
-            //Debug.Log("Hitbox disabled");
+            hitTargets.Clear();
+            hitboxWasDisabled = true;
+            Debug.Log("Hitbox disabled");
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("nihuya udar nachalsya");
         if (!hitboxCollider.enabled) return;
 
-        Debug.Log("nihuya udar zashitalsya pochti");
-        if (other.TryGetComponent<IDamagable>(out IDamagable target))
+        if (!hitTargets.Contains(other))
         {
-            target.TakeDamage(currentDamage);
-            Debug.Log($"Dealt {currentDamage} damage to {other.name}");
+            if (other.TryGetComponent<IDamagable>(out IDamagable target))
+            {
+                target.TakeDamage(currentDamage);
+                hitTargets.Add(other);
+                Debug.Log($"Dealt {currentDamage} damage to {other.name}");
+            }
         }
     }
 
@@ -51,4 +75,7 @@ public class MeleeWeapon : WeaponBase
     {
         lastUseTime = Time.time - cooldown;
     }
+
+    public bool WasHitboxDisabled() => hitboxWasDisabled;
+
 }

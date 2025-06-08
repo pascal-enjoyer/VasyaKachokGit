@@ -7,7 +7,7 @@ public class ComboAttackManager : MonoBehaviour
     [SerializeField] private float comboInputThreshold = 0.85f;
     [SerializeField] private float comboResetDelay = 0.2f;
 
-    public PlayerAnimationManager playerAnimationManager;
+    public PlayerAnimationSystem playerAnimationManager;
     public CharacterCombat characterCombat;
     private int currentComboIndex = 0;
     private bool isAttacking = false;
@@ -22,11 +22,11 @@ public class ComboAttackManager : MonoBehaviour
 
     private void Start()
     {
-        if (playerAnimationManager == null || playerAnimationManager.animator == null)
+/*        if (playerAnimationManager == null || playerAnimationManager.animator == null)
         {
             Debug.LogError("PlayerAnimationManager or Animator not assigned!");
             return;
-        }
+        }*/
         if (characterCombat == null)
         {
             Debug.LogError("CharacterCombat not assigned!");
@@ -37,11 +37,11 @@ public class ComboAttackManager : MonoBehaviour
 
     public void Initialize(ComboData comboData, WeaponData.WeaponType weaponType)
     {
-        if (comboData != null && comboData.comboAnimationStates != null && comboData.comboAnimationStates.Length > 0)
+/*        if (comboData != null && comboData.comboAnimationStates != null && comboData.comboAnimationStates.Length > 0)
         {
             comboStates = comboData.comboAnimationStates;
         }
-        else if (defaultCombos.TryGetValue(weaponType, out var defaults))
+        else */if (defaultCombos.TryGetValue(weaponType, out var defaults))
         {
             comboStates = defaults;
             Debug.LogWarning($"Using default combo: {string.Join(", ", defaults)}");
@@ -69,7 +69,7 @@ public class ComboAttackManager : MonoBehaviour
         }
         else
         {
-            AnimatorStateInfo state = playerAnimationManager.animator.GetCurrentAnimatorStateInfo(0);
+/*            AnimatorStateInfo state = playerAnimationManager.animator.GetCurrentAnimatorStateInfo(0);
             if (currentComboIndex < comboStates.Length && state.normalizedTime < comboInputThreshold && IsCurrentComboAnimation())
             {
                 if (currentComboIndex < comboStates.Length - 1)
@@ -80,13 +80,13 @@ public class ComboAttackManager : MonoBehaviour
                 {
                     nextAttackQueued = true;
                 }
-            }
+            }*/
         }
     }
 
     private void Update()
     {
-        if (!isAttacking) return;
+/*        if (!isAttacking) return;
 
         AnimatorStateInfo state = playerAnimationManager.animator.GetCurrentAnimatorStateInfo(0);
 
@@ -109,7 +109,7 @@ public class ComboAttackManager : MonoBehaviour
         {
             //Debug.LogWarning($"Unexpected animation state: {state.fullPathHash}. Resetting.");
             ResetCombo();
-        }
+        }*/
     }
 
     private void PlayCombo()
@@ -135,7 +135,7 @@ public class ComboAttackManager : MonoBehaviour
 
 
         string animName = comboStates[currentComboIndex];
-        playerAnimationManager.ChangeAnimation(animName);
+        playerAnimationManager.PlayAnimation(animName);
         isAttacking = true;
         nextAttackQueued = false;
         lastAttackTime = Time.time;
@@ -144,12 +144,12 @@ public class ComboAttackManager : MonoBehaviour
 
     private bool IsCurrentComboAnimation()
     {
-        AnimatorStateInfo state = playerAnimationManager.animator.GetCurrentAnimatorStateInfo(0);
+/*        AnimatorStateInfo state = playerAnimationManager.animator.GetCurrentAnimatorStateInfo(0);
         for (int i = 0; i < comboStates.Length; i++)
         {
             if (state.IsName(comboStates[i]))
                 return true;
-        }
+        }*/
         return false;
     }
 
@@ -158,7 +158,7 @@ public class ComboAttackManager : MonoBehaviour
         currentComboIndex = 0;
         isAttacking = false;
         nextAttackQueued = false;
-        playerAnimationManager.ChangeAnimation("FromIdleToRun");
-        playerAnimationManager.animator.Play("FromIdleToRun", 0, 0f);
+        playerAnimationManager.PlayAnimation("FromIdleToRun");
+        //playerAnimationManager.animator.Play("FromIdleToRun", 0, 0f);
     }
 }

@@ -3,7 +3,10 @@ using UnityEngine;
 
 public class MeleeEnemy : EnemyBase
 {
-    
+    public void DieEnemy()
+    {
+        Die();
+    }
 
     protected override void ChasePlayer()
     {

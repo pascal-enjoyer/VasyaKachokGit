@@ -3,30 +3,18 @@ using UnityEngine.Events;
 
 public class CharacterCombat : MonoBehaviour
 {
-    private IWeapon currentWeapon;
-    [SerializeField] private GameObject currentTarget;
-    public UnityEvent<GameObject> WeaponOnTargetUsed;
-    public UnityEvent CharacterAttacked;
-    [SerializeField] private ComboAttackManager comboManager;
-    [SerializeField] private Animator animator;
-    private float lastInputTime;
-    [SerializeField] private float inputCooldown = 0.1f;
     [SerializeField] private float baseDamage = 10f;
+    private IWeapon currentWeapon;
+    private GameObject currentTarget;
+    private ComboSystem comboSystem;
+    private PlayerAnimationSystem animationSystem;
+
+    public UnityEvent<GameObject> WeaponOnTargetUsed;
 
     private void Start()
     {
-        if (comboManager == null)
-        {
-            Debug.LogError("ComboManager not assigned!");
-        }
-        else
-        {
-            CharacterAttacked.AddListener(comboManager.TryAttack);
-        }
-        if (animator == null)
-        {
-            Debug.LogError("Animator not assigned!");
-        }
+        comboSystem = GetComponent<ComboSystem>();
+        animationSystem = GetComponent<PlayerAnimationSystem>();
     }
 
     public void EquipWeapon(IWeapon newWeapon)
@@ -34,30 +22,42 @@ public class CharacterCombat : MonoBehaviour
         currentWeapon = newWeapon;
         if (newWeapon is WeaponBase weaponBase)
         {
-            weaponBase.SetOwner(this);
-            if (comboManager != null)
+            weaponBase.Initialize(weaponBase.weaponData, weaponBase.rarity);
+            if (comboSystem != null)
             {
-                comboManager.Initialize(
-                    weaponBase.weaponData.comboData,
-                    weaponBase.weaponData.weaponType);
+                comboSystem.Initialize(weaponBase.weaponData);
             }
         }
     }
 
-    public void UnequipWeapon() => currentWeapon = null;
+    public void UnequipWeapon()
+    {
+        if (currentWeapon is IHitboxWeapon hitboxWeapon)
+        {
+            hitboxWeapon.DisableHitbox();
+        }
+        currentWeapon = null;
+    }
 
     public void UseWeapon()
     {
-        if (Time.time - lastInputTime < inputCooldown)
-            return;
-
         currentWeapon.Use();
-        CharacterAttacked?.Invoke();
-        lastInputTime = Time.time;
+    }
 
-        if (currentTarget != null && currentTarget.activeInHierarchy)
+    public void OnAttackAnimationStart()
+    {
+        UseWeapon();
+    }
+
+    public void OnAttackAnimationEnd()
+    {
+        if (currentWeapon is IHitboxWeapon hitboxWeapon)
         {
-            WeaponOnTargetUsed?.Invoke(currentTarget);
+            hitboxWeapon.DisableHitbox();
+        }
+        if (comboSystem != null)
+        {
+            comboSystem.OnAttackEnd();
         }
     }
 
@@ -71,7 +71,26 @@ public class CharacterCombat : MonoBehaviour
 
     public GameObject GetTarget() => currentTarget;
 
-    public float GetLastInputTime() => lastInputTime;
-
-    public void SetBaseDamage(float damage) => baseDamage = damage;
+    public void TryAttack()
+    {
+        if (currentTarget != null && currentTarget.activeInHierarchy)
+        {
+            WeaponOnTargetUsed?.Invoke(currentTarget);
+        }
+        if (comboSystem != null)
+        {
+            comboSystem.TryAttack();
+        }
+        else
+        {
+            if (animationSystem != null)
+            {
+                animationSystem.PlayAnimation("Default_Attack");
+            }
+            else
+            {
+                Debug.LogWarning("No animation system found for default attack.");
+            }
+        }
+    }
 }

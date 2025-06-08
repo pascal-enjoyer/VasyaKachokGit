@@ -5,7 +5,7 @@ public class PlayerMovementController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private AnchoredJoystick joystick;
-    [SerializeField] private PlayerAnimationManager animationManager;
+    [SerializeField] private PlayerAnimationSystem animationManager;
     [SerializeField] private CameraController thirdPersonCamera;
 
     [Header("Settings")]
